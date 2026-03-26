@@ -488,7 +488,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 // ── SUPABASE ─────────────────────────────────────────────────
 const SUPABASE_URL = 'https://fkbusafoleeayzhfdtuk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrYnVzYWZvbGVlYXl6aGZkdHVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzMzNTIsImV4cCI6MjA5MDEwOTM1Mn0.st7rTMSUmXVPYLeiRcgJ5FdaVKH2ci3iRecS_w6xHqM';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ─────────────────────────────────────────────────────
 let state = {
@@ -828,7 +828,7 @@ async function saveData() {
   collectMeta();
   setStatus('⏳ Speichern …');
   try {
-    const { error } = await supabase
+    const { error } = await sb
       .from('protokoll')
       .upsert({ id: 'current', data: state, updated_at: new Date().toISOString() });
     if (error) throw error;
@@ -843,7 +843,7 @@ async function saveData() {
 async function loadData() {
   setStatus('⏳ Laden …');
   try {
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from('protokoll')
       .select('data')
       .eq('id', 'current')
@@ -868,7 +868,7 @@ async function loadData() {
 async function clearAll() {
   if (confirm('Alle Daten dieses Protokolls löschen?')) {
     try {
-      await supabase.from('protokoll').update({ data: {} }).eq('id', 'current');
+      await sb.from('protokoll').update({ data: {} }).eq('id', 'current');
     } catch(e) {}
     localStorage.removeItem('mbr_current'); location.reload();
   }
@@ -911,7 +911,7 @@ function applyLoadedState(loaded) {
 document.addEventListener('DOMContentLoaded', async () => {
   let loadedFromServer = false;
   try {
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from('protokoll')
       .select('data')
       .eq('id', 'current')
@@ -941,7 +941,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setStatus(loadedFromServer ? '✓ Von Supabase geladen' : 'Bereit');
 
   // ── Echtzeit-Subscription: Änderungen von anderen Tabs/Geräten ──
-  supabase.channel('protokoll-realtime')
+  sb.channel('protokoll-realtime')
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'protokoll', filter: 'id=eq.current' },
       (payload) => {
         if (payload.new && payload.new.data && Object.keys(payload.new.data).length > 0) {
