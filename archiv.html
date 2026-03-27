@@ -565,7 +565,11 @@ function exportMonthPDF(idx) {
   if (targetBody) targetBody.classList.add('open');
   if (targetArrow) targetArrow.classList.add('open');
 
-  document.title = 'Protokoll – ' + month.label;
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  document.title = `${y}-${m}-${d} weekly Management JF`;
   window.print();
   document.title = 'Helfende Hände – Archiv';
 
@@ -579,7 +583,14 @@ function printMonth() {
   // Open all months for full print
   document.querySelectorAll('.month-body').forEach(b => b.classList.add('open'));
   document.querySelectorAll('.arrow').forEach(a => a.classList.add('open'));
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  const origTitle = document.title;
+  document.title = `${y}-${m}-${d} weekly Management JF`;
   window.print();
+  document.title = origTitle;
 }
 
 // Close edit overlay on outside click

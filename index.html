@@ -386,7 +386,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <div class="toolbar no-print">
   <button class="btn btn-secondary" onclick="newMonth()">📋 Neuer Monat</button>
   <a href="archiv.html" class="btn btn-secondary" style="text-decoration:none;">🗂 Archiv</a>
-  <button class="btn btn-print" onclick="window.print()">🖨 Drucken / PDF</button>
+  <button class="btn btn-print" onclick="printPDF()">🖨 Drucken / PDF</button>
   <button class="btn btn-danger btn-sm" onclick="clearAll()" title="Alle Daten löschen">🗑 Reset</button>
   <span id="save-status"><span class="status-dot pending"></span>Nicht gespeichert</span>
 </div>
@@ -656,6 +656,18 @@ function addTask() {
   document.getElementById('nt-due').value    = '';
   setDefaultDueDate();
   renderTasks(); markDirty();
+}
+
+// ── PRINT / PDF ──────────────────────────────────────────────
+function printPDF() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  const origTitle = document.title;
+  document.title = `${y}-${m}-${d} weekly Management JF`;
+  window.print();
+  document.title = origTitle;
 }
 
 // ── NEW MONTH ─────────────────────────────────────────────────
