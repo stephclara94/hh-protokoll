@@ -57,9 +57,9 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 .doc-header .period-label { font-size: 13px; color: var(--gray-med); font-weight: 600; }
 
 /* ── TOOLBAR (screen only, sticky) ──────────────────────────── */
-.toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+.toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; justify-content: center;
   position: sticky; top: 0; z-index: 100; background: #F5F7F6; padding: 12px 0; border-bottom: 1px solid var(--border); }
-.toolbar span { font-size: 13px; color: var(--gray-med); margin-left: auto; }
+.toolbar span { font-size: 13px; color: var(--gray-med); }
 .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 .status-dot.connected { background: var(--green); box-shadow: 0 0 4px var(--green); }
 .status-dot.error { background: var(--red); }
@@ -119,6 +119,11 @@ table.kpi-table tr:nth-child(even) td { background: #FAFCFB; }
 .beschluss-item { display: grid; grid-template-columns: 32px 1fr 160px 40px;
   gap: 8px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .beschluss-item .nr { font-weight: 700; color: var(--green); text-align: center; padding-top: 8px; font-size: 13px; }
+.beschluss-item .beschluss-fields { display: flex; flex-direction: column; gap: 6px; }
+.beschluss-item input.beschluss-header { width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 6px; font-family: var(--font); font-size: 14px; font-weight: 600;
+  background: #FAFCFB; color: var(--gray-dark); transition: border-color .2s, box-shadow .2s; }
+.beschluss-item input.beschluss-header:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,132,61,.12); outline: none; }
 .beschluss-item textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border);
   border-radius: 6px; font-family: var(--font); font-size: 14px; resize: vertical; min-height: 56px;
   background: #FAFCFB; color: var(--gray-dark); transition: border-color .2s, box-shadow .2s; }
@@ -190,10 +195,11 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   .meta-grid input, .meta-grid textarea { max-width: 100%; box-sizing: border-box; }
   .meta-grid input[type="date"] { height: auto; padding: 8px 14px; font-size: 14px; -webkit-appearance: none; }
   .section { padding: 14px 14px; overflow-x: hidden; }
-  .toolbar { gap: 6px; padding: 8px 0; }
+  .toolbar { gap: 6px; padding: 8px 0; justify-content: center; }
   .toolbar .btn { padding: 6px 10px; font-size: 12px; }
+  .toolbar span { width: 100%; text-align: center; }
   .beschluss-item { grid-template-columns: 28px 1fr 100px 34px; gap: 6px; }
-  .beschluss-item textarea, .beschluss-item select { max-width: 100%; box-sizing: border-box; }
+  .beschluss-item textarea, .beschluss-item select, .beschluss-item input.beschluss-header { max-width: 100%; box-sizing: border-box; }
   .add-task-row { flex-direction: column; }
   .add-task-row input, .add-task-row select, .add-task-row .btn { width: 100% !important; min-width: 0 !important; max-width: 100% !important; box-sizing: border-box !important; }
   .add-task-row input[type="date"] { height: auto !important; padding: 8px 14px !important; font-size: 14px !important; -webkit-appearance: none !important; }
@@ -303,13 +309,14 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   .beschluss-item { grid-template-columns: 24px 1fr 110px; }
   .beschluss-item select { border: none; background: transparent; font-size: 8.5pt; }
   .beschluss-item textarea { font-size: 8.5pt; }
+  .beschluss-item input.beschluss-header { border: none; border-bottom: 0.5pt solid #bbb; background: transparent; border-radius: 0; font-size: 9pt; }
 
   .sig-section { page-break-before: always; }
 }
 
 /* ── SIGNATURE BLOCK (always visible in print) ───────────────── */
 .sig-section { margin-top: 24px; }
-.sig-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-top: 16px; max-width: 560px; }
+.sig-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-top: 16px; max-width: 560px; margin-left: auto; margin-right: auto; }
 .sig-box { display: flex; flex-direction: column; gap: 6px; }
 .sig-box .sig-name  { font-weight: 700; font-size: 13px; color: var(--gray-dark); }
 .sig-box .sig-role  { font-size: 11px; color: var(--gray-med); }
@@ -387,7 +394,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   <button class="btn btn-secondary" onclick="newMonth()">📋 Neuer Monat</button>
   <a href="archiv.html" class="btn btn-secondary" style="text-decoration:none;">🗂 Archiv</a>
   <button class="btn btn-print" onclick="printPDF()">🖨 Drucken / PDF</button>
-  <button class="btn btn-danger btn-sm" onclick="clearAll()" title="Alle Daten löschen">🗑 Reset</button>
+  <button class="btn btn-danger" onclick="clearAll()" title="Alle Daten löschen">🗑 Reset</button>
   <span id="save-status"><span class="status-dot pending"></span>Nicht gespeichert</span>
 </div>
 
@@ -405,7 +412,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <!-- ── 3. AGENDA ─────────────────────────────────────────────── -->
 <div class="section">
   <div class="section-title"><span class="section-num">2</span>Agenda</div>
-  <p style="font-size:12px;color:var(--gray-med);margin-bottom:12px;">Agenda-Punkte eintragen – das Protokoll (Abschnitt 4) wird automatisch befüllt.</p>
+  <p style="font-size:14px;color:var(--gray-med);margin-bottom:12px;">Agenda-Punkte eintragen – das Protokoll (Abschnitt 4) wird automatisch befüllt.</p>
   <div class="task-table-wrap">
     <table class="kpi-table">
       <thead><tr>
@@ -431,7 +438,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <!-- ── 5. BESCHLÜSSE ─────────────────────────────────────────── -->
 <div class="section">
   <div class="section-title"><span class="section-num">3</span>Weitere Beschlüsse</div>
-  <p style="font-size:12px;color:var(--gray-med);margin-bottom:12px;">Alle Beschlüsse wurden einstimmig gefasst, soweit nicht anders vermerkt.</p>
+  <p style="font-size:14px;color:var(--gray-med);margin-bottom:12px;">Alle Beschlüsse wurden einstimmig gefasst, soweit nicht anders vermerkt.</p>
   <div id="beschluss-list"></div>
   <button class="btn btn-secondary btn-sm no-print" style="margin-top:8px" onclick="addBeschluss()">+ Beschluss hinzufügen</button>
 </div>
@@ -441,10 +448,10 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   <div class="section-title"><span class="section-num">4</span>Aufgaben</div>
   <div class="tracker-header">
     <div class="legend">
-      <span class="legend-pill pill-open">● OFFEN</span>
-      <span class="legend-pill pill-done">● ERLEDIGT</span>
-      <span class="legend-pill pill-delayed">● VERZÖGERT</span>
       <span class="legend-pill pill-dropped">● ENTFÄLLT</span>
+      <span class="legend-pill pill-open">● OFFEN</span>
+      <span class="legend-pill pill-delayed">● VERZÖGERT</span>
+      <span class="legend-pill pill-done">● ERLEDIGT</span>
     </div>
   </div>
   <div class="task-table-wrap">
@@ -483,7 +490,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <!-- ── 9. UNTERSCHRIFTEN ─────────────────────────────────────── -->
 <div class="section sig-section">
   <div class="section-title"><span class="section-num">5</span>Genehmigung &amp; Unterschriften</div>
-  <p style="font-size:12px;color:var(--gray-med);margin-bottom:20px;">
+  <p style="font-size:13px;color:var(--gray-med);margin-bottom:20px;text-align:center;">
     Durch ihre Unterschrift bestätigen die Gesellschafter die Richtigkeit des Protokolls und die Gültigkeit der gefassten Beschlüsse.
   </p>
   <div class="sig-grid">
@@ -572,7 +579,10 @@ function renderBeschluesse() {
     div.className = 'beschluss-item';
     div.innerHTML = `
       <div class="nr">${i+1}</div>
-      <textarea rows="2" oninput="state.beschluesse[${i}].text=this.value;markDirty();" placeholder="Beschlusstext …">${b.text||''}</textarea>
+      <div class="beschluss-fields">
+        <input type="text" class="beschluss-header" value="${escH(b.header||'')}" oninput="state.beschluesse[${i}].header=this.value;markDirty();" placeholder="Beschluss-Titel …">
+        <textarea rows="2" oninput="state.beschluesse[${i}].text=this.value;markDirty();" placeholder="Beschlusstext …">${b.text||''}</textarea>
+      </div>
       <select onchange="state.beschluesse[${i}].abstimmung=this.value;markDirty();">
         <option ${b.abstimmung==='Einstimmig'?'selected':''}>Einstimmig</option>
         <option ${b.abstimmung==='Mehrheitlich'?'selected':''}>Mehrheitlich</option>
@@ -583,11 +593,11 @@ function renderBeschluesse() {
     el.appendChild(div);
   });
   if (state.beschluesse.length === 0) {
-    el.innerHTML = '<p style="font-size:12px;color:var(--gray-med);padding:8px 0;">Noch keine Beschlüsse erfasst.</p>';
+    el.innerHTML = '<p style="font-size:14px;color:var(--gray-med);padding:8px 0;">Noch keine Beschlüsse erfasst.</p>';
   }
 }
 function addBeschluss() {
-  state.beschluesse.push({ text:'', abstimmung:'Einstimmig' });
+  state.beschluesse.push({ header:'', text:'', abstimmung:'Einstimmig' });
   renderBeschluesse(); markDirty();
 }
 function delBeschluss(i) {
@@ -618,14 +628,14 @@ function renderTasks() {
       <td><input type="date" value="${t.done||''}" onchange="updateTask(${i},'done',this.value)"></td>
       <td class="td-status">
         <select onchange="updateTaskStatus(${i},this.value)">
-          ${['OFFEN','ERLEDIGT','VERZÖGERT','ENTFÄLLT'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
+          ${['ENTFÄLLT','OFFEN','VERZÖGERT','ERLEDIGT'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
       <td class="td-actions no-print"><button onclick="delTask(${i})" title="Löschen">✕</button></td>`;
     body.appendChild(tr);
   });
   if (state.tasks.length === 0) {
-    body.innerHTML = '<tr><td colspan="9" style="color:var(--gray-med);font-size:12px;padding:10px 8px;">Keine Aufgaben erfasst.</td></tr>';
+    body.innerHTML = '<tr><td colspan="9" style="color:var(--gray-med);font-size:14px;padding:10px 8px;">Keine Aufgaben erfasst.</td></tr>';
   }
 }
 function updateTask(i, field, val) {
