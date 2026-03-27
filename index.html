@@ -176,15 +176,18 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
 
 /* ── MOBILE ──────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .page-wrap { padding: 16px 12px 40px; }
+  .page-wrap { padding: 16px 12px 40px; overflow-x: hidden; }
   .doc-header { flex-direction: column; gap: 8px; align-items: flex-start; padding: 12px 14px; margin: -16px -12px 0; }
   .doc-header .brand-name { font-size: 17px; }
   .doc-header .header-right { width: 100%; justify-content: space-between; }
   .meta-grid { grid-template-columns: 1fr; }
+  .meta-grid input, .meta-grid textarea { max-width: 100%; box-sizing: border-box; }
+  .meta-grid input[type="date"] { height: auto; padding: 8px 14px; font-size: 14px; -webkit-appearance: none; }
   .section { padding: 14px 14px; overflow-x: hidden; }
   .toolbar { gap: 6px; padding: 8px 0; }
   .toolbar .btn { padding: 6px 10px; font-size: 12px; }
   .beschluss-item { grid-template-columns: 28px 1fr 100px 34px; gap: 6px; }
+  .beschluss-item textarea, .beschluss-item select { max-width: 100%; box-sizing: border-box; }
   .add-task-row { flex-direction: column; }
   .add-task-row input, .add-task-row select, .add-task-row .btn { width: 100% !important; min-width: 0 !important; max-width: 100% !important; box-sizing: border-box !important; }
   table.task-table { font-size: 11px; min-width: 580px; }
@@ -192,6 +195,7 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   .sig-grid { grid-template-columns: 1fr; gap: 24px; }
   .section-title { font-size: 14px; }
   .kpi-table { display: block; overflow-x: auto; }
+  .notes-block textarea { max-width: 100%; box-sizing: border-box; }
 }
 
 /* ── LOGIN ANIMATION ────────────────────────────────────────── */
