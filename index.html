@@ -50,9 +50,14 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 }
 .doc-header .period-label { font-size: 13px; color: var(--gray-med); font-weight: 600; }
 
-/* ── TOOLBAR (screen only) ───────────────────────────────────── */
-.toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+/* ── TOOLBAR (screen only, sticky) ──────────────────────────── */
+.toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
+  position: sticky; top: 0; z-index: 100; background: #F5F7F6; padding: 12px 0; border-bottom: 1px solid var(--border); }
 .toolbar span { font-size: 13px; color: var(--gray-med); margin-left: auto; }
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.status-dot.connected { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.status-dot.error { background: var(--red); }
+.status-dot.pending { background: var(--amber); }
 .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;
   font-size: 13px; font-weight: 600; font-family: var(--font); transition: opacity .15s; }
 .btn:hover { opacity: .85; }
@@ -66,15 +71,20 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 .section { background: var(--white); border: 1px solid var(--border); border-radius: 6px;
   padding: 20px 22px; margin-bottom: 18px; }
 .section-title { font-size: 15px; font-weight: 700; color: var(--green);
-  border-bottom: 2px solid var(--green); padding-bottom: 6px; margin-bottom: 16px; }
+  border-bottom: 2px solid var(--green); padding-bottom: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.section-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+  background: var(--green); color: #fff; border-radius: 50%; font-size: 13px; font-weight: 700; flex-shrink: 0; }
 .section-sub   { font-size: 13px; font-weight: 600; color: var(--gray-dark); margin: 14px 0 8px; }
 
 /* ── META GRID ───────────────────────────────────────────────── */
 .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
 .meta-grid label { font-size: 12px; font-weight: 600; color: var(--gray-med); display: block; margin-bottom: 3px; }
 .meta-grid input, .meta-grid textarea {
-  width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 4px;
-  font-family: var(--font); font-size: 13px; color: var(--gray-dark); background: #FAFCFB; }
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px;
+  font-family: var(--font); font-size: 14px; color: var(--gray-dark); background: #FAFCFB;
+  transition: border-color .2s, box-shadow .2s; }
+.meta-grid input:focus, .meta-grid textarea:focus {
+  border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,132,61,.12); outline: none; }
 .meta-grid textarea { resize: vertical; min-height: 54px; }
 .meta-full { grid-column: 1 / -1; }
 
@@ -82,7 +92,8 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 table.kpi-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 table.kpi-table th { background: var(--green); color: #fff; padding: 8px 10px; text-align: left;
   font-weight: 600; font-size: 12px; }
-table.kpi-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+table.kpi-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); transition: background .15s; }
+table.kpi-table tbody tr:hover td { background: var(--green-light) !important; }
 table.kpi-table td input { width: 100%; border: none; background: transparent; font-family: var(--font);
   font-size: 13px; color: var(--gray-dark); outline: none; }
 table.kpi-table td input:focus { background: var(--green-light); border-radius: 3px; padding: 2px 4px; }
@@ -102,14 +113,15 @@ table.kpi-table tr:nth-child(even) td { background: #FAFCFB; }
 .beschluss-item { display: grid; grid-template-columns: 32px 1fr 160px 40px;
   gap: 8px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .beschluss-item .nr { font-weight: 700; color: var(--green); text-align: center; padding-top: 8px; font-size: 13px; }
-.beschluss-item textarea { width: 100%; padding: 7px 9px; border: 1px solid var(--border);
-  border-radius: 4px; font-family: var(--font); font-size: 13px; resize: vertical; min-height: 52px;
-  background: #FAFCFB; color: var(--gray-dark); }
-.beschluss-item select { width: 100%; padding: 7px 8px; border: 1px solid var(--border);
-  border-radius: 4px; font-family: var(--font); font-size: 12px; background: #FAFCFB; }
-.beschluss-item .del-btn { padding: 6px 8px; font-size: 13px; cursor: pointer; background: none;
-  border: none; color: #aaa; align-self: center; }
-.beschluss-item .del-btn:hover { color: var(--red); }
+.beschluss-item textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 6px; font-family: var(--font); font-size: 14px; resize: vertical; min-height: 56px;
+  background: #FAFCFB; color: var(--gray-dark); transition: border-color .2s, box-shadow .2s; }
+.beschluss-item textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,132,61,.12); outline: none; }
+.beschluss-item select { width: 100%; padding: 10px 8px; border: 1px solid var(--border);
+  border-radius: 6px; font-family: var(--font); font-size: 13px; background: #FAFCFB; }
+.beschluss-item .del-btn { padding: 6px 8px; font-size: 15px; cursor: pointer; background: none;
+  border: none; color: #ccc; align-self: center; border-radius: 4px; transition: all .2s; }
+.beschluss-item .del-btn:hover { color: var(--red); background: #fde8e8; transform: scale(1.15); }
 
 /* ── TASK TRACKER ────────────────────────────────────────────── */
 .tracker-header { display: grid; gap: 6px; align-items: center; margin-bottom: 10px; }
@@ -125,7 +137,8 @@ table.kpi-table tr:nth-child(even) td { background: #FAFCFB; }
 table.task-table { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 700px; }
 table.task-table th { background: var(--green); color: #fff; padding: 8px 8px; font-size: 11.5px;
   font-weight: 600; white-space: nowrap; text-align: left; }
-table.task-table td { padding: 6px 7px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+table.task-table td { padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background .15s; }
+table.task-table tbody tr:hover td { background: var(--green-light) !important; }
 table.task-table tr:nth-child(even) td { background: #FAFCFB; }
 table.task-table td input[type=text], table.task-table td input[type=date] {
   width: 100%; border: none; background: transparent; font-family: var(--font);
@@ -141,13 +154,16 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
 .status-delayed { background: #FDECEA !important; }
 .status-dropped { background: #EBEBEB !important; color: #999 !important; text-decoration: line-through; }
 
-.td-actions button { background: none; border: none; cursor: pointer; font-size: 14px;
-  padding: 2px 4px; color: #aaa; }
-.td-actions button:hover { color: var(--red); }
+.td-actions button { background: none; border: none; cursor: pointer; font-size: 16px;
+  padding: 4px 6px; color: #ccc; border-radius: 4px; transition: all .2s; }
+.td-actions button:hover { color: var(--red); background: #fde8e8; transform: scale(1.15); }
 
 .add-task-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-.add-task-row input, .add-task-row select { padding: 7px 10px; border: 1px solid var(--border);
-  border-radius: 4px; font-family: var(--font); font-size: 13px; background: #FAFCFB; }
+.add-task-row input, .add-task-row select { padding: 10px 14px; border: 1px solid var(--border);
+  border-radius: 6px; font-family: var(--font); font-size: 14px; background: #FAFCFB;
+  transition: border-color .2s, box-shadow .2s; }
+.add-task-row input:focus, .add-task-row select:focus {
+  border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,132,61,.12); outline: none; }
 .add-task-row input.task-desc { flex: 1; min-width: 200px; }
 .add-task-row input.task-person { width: 140px; }
 .add-task-row input.task-date   { width: 130px; }
@@ -158,7 +174,30 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   border-radius: 5px; padding: 10px 14px; margin-bottom: 12px; font-size: 12.5px; color: var(--gray-dark); }
 .carryover-notice strong { color: var(--green); }
 
-/* ── NAECHSTES MEETING ───────────────────────────────────────── */
+/* ── MOBILE ──────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .page-wrap { padding: 16px 12px 40px; }
+  .doc-header { flex-direction: column; gap: 8px; align-items: flex-start; padding: 12px 14px; margin: -16px -12px 0; }
+  .doc-header .brand-name { font-size: 17px; }
+  .doc-header .header-right { width: 100%; justify-content: space-between; }
+  .meta-grid { grid-template-columns: 1fr; }
+  .section { padding: 14px 14px; }
+  .toolbar { gap: 6px; padding: 8px 0; }
+  .toolbar .btn { padding: 6px 10px; font-size: 12px; }
+  .beschluss-item { grid-template-columns: 28px 1fr 120px 34px; gap: 6px; }
+  .add-task-row { flex-direction: column; }
+  .add-task-row input, .add-task-row select { width: 100% !important; min-width: 0 !important; }
+  table.task-table { font-size: 11px; min-width: 580px; }
+  table.task-table th { font-size: 10px; padding: 6px 5px; }
+  .sig-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+
+/* ── LOGIN ANIMATION ────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.login-card { animation: fadeInUp .4s ease-out; }
 
 /* ── PRINT ───────────────────────────────────────────────────── */
 @media print {
@@ -269,9 +308,9 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
 
 <!-- PASSWORD OVERLAY -->
 <div id="pw-overlay" style="position:fixed;inset:0;z-index:99999;background:#F5F7F6;display:flex;align-items:center;justify-content:center;">
-  <div style="background:#fff;border:1px solid #C8DDD4;border-radius:8px;padding:40px 36px;max-width:380px;width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);">
-    <div style="font-size:28px;margin-bottom:8px;">🔒</div>
-    <h2 style="font-size:18px;font-weight:700;color:#00843D;margin-bottom:4px;">Helfende Hände Group</h2>
+  <div class="login-card" style="background:#fff;border:1px solid #C8DDD4;border-radius:12px;padding:40px 36px;max-width:400px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.10);">
+    <div style="margin-bottom:12px;"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#00843D"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="20" font-weight="700" font-family="Segoe UI,Arial">H²</text></svg></div>
+    <h2 style="font-size:20px;font-weight:700;color:#00843D;margin-bottom:4px;">Helfende Hände Group</h2>
     <p style="font-size:13px;color:#5C5C5C;margin-bottom:20px;">Bitte anmelden, um fortzufahren.</p>
     <input id="user-input" type="email" placeholder="E-Mail-Adresse"
       style="width:100%;padding:10px 14px;border:1px solid #C8DDD4;border-radius:4px;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;"
@@ -336,12 +375,12 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   <a href="archiv.html" class="btn btn-secondary" style="text-decoration:none;">🗂 Archiv</a>
   <button class="btn btn-print" onclick="window.print()">🖨 Drucken / PDF</button>
   <button class="btn btn-danger btn-sm" onclick="clearAll()" title="Alle Daten löschen">🗑 Reset</button>
-  <span id="save-status">Nicht gespeichert</span>
+  <span id="save-status"><span class="status-dot pending"></span>Nicht gespeichert</span>
 </div>
 
 <!-- ── 1. MEETINGDATEN ───────────────────────────────────────── -->
 <div class="section">
-  <div class="section-title">1 &nbsp;Meetingdaten</div>
+  <div class="section-title"><span class="section-num">1</span>Meetingdaten</div>
   <div class="meta-grid">
     <div><label>Datum</label><input type="date" id="m-date"></div>
     <div><label>Teilnehmer</label><input type="text" id="m-teilnehmer" placeholder="Stephan Clara, Karl Pfeifer"></div>
@@ -352,7 +391,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 
 <!-- ── 3. AGENDA ─────────────────────────────────────────────── -->
 <div class="section">
-  <div class="section-title">2 &nbsp;Agenda</div>
+  <div class="section-title"><span class="section-num">2</span>Agenda</div>
   <p style="font-size:12px;color:var(--gray-med);margin-bottom:12px;">Agenda-Punkte eintragen – das Protokoll (Abschnitt 4) wird automatisch befüllt.</p>
   <div class="task-table-wrap">
     <table class="kpi-table">
@@ -378,7 +417,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 
 <!-- ── 5. BESCHLÜSSE ─────────────────────────────────────────── -->
 <div class="section">
-  <div class="section-title">3 &nbsp;Weitere Beschlüsse</div>
+  <div class="section-title"><span class="section-num">3</span>Weitere Beschlüsse</div>
   <p style="font-size:12px;color:var(--gray-med);margin-bottom:12px;">Alle Beschlüsse wurden einstimmig gefasst, soweit nicht anders vermerkt.</p>
   <div id="beschluss-list"></div>
   <button class="btn btn-secondary btn-sm no-print" style="margin-top:8px" onclick="addBeschluss()">+ Beschluss hinzufügen</button>
@@ -386,7 +425,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 
 <!-- ── 6. NEUE AUFGABEN (dieses Meeting) ────────────────────── -->
 <div class="section">
-  <div class="section-title">4 &nbsp;Aufgaben</div>
+  <div class="section-title"><span class="section-num">4</span>Aufgaben</div>
   <div class="tracker-header">
     <div class="legend">
       <span class="legend-pill pill-open">● OFFEN</span>
@@ -430,7 +469,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 
 <!-- ── 9. UNTERSCHRIFTEN ─────────────────────────────────────── -->
 <div class="section sig-section">
-  <div class="section-title">5 &nbsp;Genehmigung &amp; Unterschriften</div>
+  <div class="section-title"><span class="section-num">5</span>Genehmigung &amp; Unterschriften</div>
   <p style="font-size:12px;color:var(--gray-med);margin-bottom:20px;">
     Durch ihre Unterschrift bestätigen die Gesellschafter die Richtigkeit des Protokolls und die Gültigkeit der gefassten Beschlüsse.
   </p>
@@ -666,22 +705,22 @@ function updateHeaderPeriod() {
 // ── PERSIST (Supabase + localStorage fallback) ───────────────
 async function saveData() {
   collectMeta();
-  setStatus('⏳ Speichern …');
+  setStatus('Speichern …', 'pending');
   try {
     const { error } = await sb
       .from('protokoll')
       .upsert({ id: 'current', data: state, updated_at: new Date().toISOString() });
     if (error) throw error;
     localStorage.setItem('mbr_current', JSON.stringify(state));
-    setStatus('✓ Gespeichert – ' + new Date().toLocaleTimeString('de-DE'));
+    setStatus('Gespeichert – ' + new Date().toLocaleTimeString('de-DE'), 'ok');
   } catch(e) {
     localStorage.setItem('mbr_current', JSON.stringify(state));
-    setStatus('⚠ Lokal gespeichert (Supabase nicht erreichbar)');
+    setStatus('Lokal gespeichert (Supabase nicht erreichbar)', 'error');
     console.warn('Supabase-Speichern fehlgeschlagen:', e);
   }
 }
 async function loadData() {
-  setStatus('⏳ Laden …');
+  setStatus('Laden …', 'pending');
   try {
     const { data, error } = await sb
       .from('protokoll')
@@ -690,18 +729,18 @@ async function loadData() {
       .single();
     if (error) throw error;
     if (!data || !data.data || Object.keys(data.data).length === 0) {
-      alert('Keine gespeicherten Daten gefunden.'); setStatus('Bereit'); return;
+      alert('Keine gespeicherten Daten gefunden.'); setStatus('Bereit', 'ok'); return;
     }
     state = data.data;
     localStorage.setItem('mbr_current', JSON.stringify(state));
     renderAll();
-    setStatus('↩ Geladen – ' + new Date().toLocaleTimeString('de-DE'));
+    setStatus('Geladen – ' + new Date().toLocaleTimeString('de-DE'), 'ok');
   } catch(e) {
     const raw = localStorage.getItem('mbr_current');
-    if (!raw) { alert('Keine gespeicherten Daten gefunden.'); setStatus('Bereit'); return; }
+    if (!raw) { alert('Keine gespeicherten Daten gefunden.'); setStatus('Bereit', 'ok'); return; }
     state = JSON.parse(raw);
     renderAll();
-    setStatus('⚠ Lokal geladen (Supabase nicht erreichbar)');
+    setStatus('Lokal geladen (Supabase nicht erreichbar)', 'error');
     console.warn('Supabase-Laden fehlgeschlagen:', e);
   }
 }
@@ -715,11 +754,16 @@ async function clearAll() {
 }
 let _saveTimer = null;
 function markDirty() {
-  setStatus('● Nicht gespeichert');
+  setStatus('Nicht gespeichert', 'error');
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => { collectMeta(); saveData(); }, 1500);
 }
-function setStatus(msg) { const el = document.getElementById('save-status'); if(el) el.textContent = msg; }
+function setStatus(msg, type) {
+  const el = document.getElementById('save-status');
+  if (!el) return;
+  const cls = type === 'error' ? 'error' : type === 'ok' ? 'connected' : 'pending';
+  el.innerHTML = '<span class="status-dot ' + cls + '"></span>' + msg;
+}
 
 // ── RENDER ALL ────────────────────────────────────────────────
 function renderAll() {
@@ -778,7 +822,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   const tnEl = document.getElementById('m-teilnehmer');
   if (tnEl && !state.meta['m-teilnehmer']) { tnEl.value = 'Stephan Clara, Karl Pfeifer'; state.meta['m-teilnehmer'] = 'Stephan Clara, Karl Pfeifer'; }
-  setStatus(loadedFromServer ? '✓ Von Supabase geladen' : 'Bereit');
+  setStatus(loadedFromServer ? 'Von Supabase geladen' : 'Bereit', 'ok');
 
   // ── Echtzeit-Subscription: Änderungen von anderen Tabs/Geräten ──
   sb.channel('protokoll-realtime')
@@ -788,7 +832,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           applyLoadedState(payload.new.data);
           localStorage.setItem('mbr_current', JSON.stringify(state));
           renderAll();
-          setStatus('🔄 Echtzeit-Update erhalten – ' + new Date().toLocaleTimeString('de-DE'));
+          setStatus('Echtzeit-Update erhalten – ' + new Date().toLocaleTimeString('de-DE'), 'ok');
         }
       })
     .subscribe();

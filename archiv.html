@@ -116,6 +116,30 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
 .edit-field textarea { resize: vertical; min-height: 60px; }
 .edit-actions { display: flex; gap: 10px; margin-top: 16px; }
 
+/* ── LOGIN ANIMATION ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.login-card { animation: fadeInUp .4s ease-out; }
+
+/* ── MOBILE ── */
+@media (max-width: 640px) {
+  .page-wrap { padding: 16px 12px 40px; }
+  .doc-header { flex-direction: column; gap: 8px; align-items: flex-start; padding: 12px 14px; margin: -16px -12px 0; }
+  .doc-header .brand-name { font-size: 17px; }
+  .stats-bar { gap: 8px; }
+  .stat-card { min-width: 0; padding: 10px 12px; }
+  .stat-card .stat-value { font-size: 20px; }
+  .stat-card .stat-label { font-size: 11px; }
+  .controls { flex-direction: column; }
+  .controls input, .controls select { width: 100%; min-width: 0; }
+  .month-header { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .month-header .actions { width: 100%; justify-content: flex-end; }
+  table.arch-table { font-size: 11px; min-width: 500px; }
+  .month-body { padding: 0 10px 12px; overflow-x: auto; }
+}
+
 /* ── PRINT ── */
 @media print {
   @page { size: A4 portrait; margin: 12mm; }
@@ -131,9 +155,9 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
 
 <!-- PASSWORD OVERLAY -->
 <div id="pw-overlay" style="position:fixed;inset:0;z-index:99999;background:#F5F7F6;display:flex;align-items:center;justify-content:center;">
-  <div style="background:#fff;border:1px solid #C8DDD4;border-radius:8px;padding:40px 36px;max-width:380px;width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);">
-    <div style="font-size:28px;margin-bottom:8px;">🔒</div>
-    <h2 style="font-size:18px;font-weight:700;color:#00843D;margin-bottom:4px;">Helfende Hände Group</h2>
+  <div class="login-card" style="background:#fff;border:1px solid #C8DDD4;border-radius:12px;padding:40px 36px;max-width:400px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.10);">
+    <div style="margin-bottom:12px;"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#00843D"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="20" font-weight="700" font-family="Segoe UI,Arial">H²</text></svg></div>
+    <h2 style="font-size:20px;font-weight:700;color:#00843D;margin-bottom:4px;">Helfende Hände Group</h2>
     <p style="font-size:13px;color:#5C5C5C;margin-bottom:20px;">Bitte anmelden, um fortzufahren.</p>
     <input id="user-input" type="email" placeholder="E-Mail-Adresse"
       style="width:100%;padding:10px 14px;border:1px solid #C8DDD4;border-radius:4px;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;"
@@ -180,6 +204,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <!-- HEADER -->
 <div class="doc-header">
   <div class="brand">
+    <svg width="40" height="40" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#00843D"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="20" font-weight="700" font-family="Segoe UI,Arial">H²</text></svg>
     <div class="brand-text">
       <div class="brand-name">HELFENDE HÄNDE GROUP</div>
       <div class="brand-sub">Archiv &middot; Protokolle vergangener Monate</div>
@@ -279,11 +304,11 @@ function renderStats() {
   const doneRate = totalTasks > 0 ? Math.round(doneTasks / totalTasks * 100) : 0;
 
   document.getElementById('stats-bar').innerHTML = `
-    <div class="stat-card"><div class="stat-value">${totalMonths}</div><div class="stat-label">Archivierte Monate</div></div>
-    <div class="stat-card"><div class="stat-value">${totalAgenda}</div><div class="stat-label">Agenda-Punkte</div></div>
-    <div class="stat-card"><div class="stat-value">${totalBeschl}</div><div class="stat-label">Beschlüsse</div></div>
-    <div class="stat-card"><div class="stat-value">${totalTasks}</div><div class="stat-label">Aufgaben gesamt</div></div>
-    <div class="stat-card"><div class="stat-value">${doneRate}%</div><div class="stat-label">Erledigungsquote</div></div>
+    <div class="stat-card"><div class="stat-value">${totalMonths}</div><div class="stat-label">📅 Archivierte Monate</div></div>
+    <div class="stat-card"><div class="stat-value">${totalAgenda}</div><div class="stat-label">📋 Agenda-Punkte</div></div>
+    <div class="stat-card"><div class="stat-value">${totalBeschl}</div><div class="stat-label">📝 Beschlüsse</div></div>
+    <div class="stat-card"><div class="stat-value">${totalTasks}</div><div class="stat-label">📊 Aufgaben gesamt</div></div>
+    <div class="stat-card"><div class="stat-value">${doneRate}%</div><div class="stat-label">✅ Erledigungsquote</div></div>
   `;
 }
 
