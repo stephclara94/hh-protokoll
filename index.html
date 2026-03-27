@@ -52,7 +52,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 .doc-header .header-right { display: flex; align-items: center; gap: 12px; }
 .doc-header .badge {
   background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
-  padding: 4px 10px; border-radius: 3px; letter-spacing: 1.2px;
+  padding: 4px 10px; border-radius: 6px; letter-spacing: 1.2px;
 }
 .doc-header .period-label { font-size: 13px; color: var(--gray-med); font-weight: 600; }
 
@@ -108,7 +108,7 @@ table.kpi-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); 
 table.kpi-table tbody tr:hover td { background: var(--green-light) !important; }
 table.kpi-table td input { width: 100%; border: none; background: transparent; font-family: var(--font);
   font-size: 13px; color: var(--gray-dark); outline: none; }
-table.kpi-table td input:focus { background: var(--green-light); border-radius: 3px; padding: 2px 4px; }
+table.kpi-table td input:focus { background: var(--green-light); border-radius: 6px; padding: 2px 4px; }
 table.kpi-table tr:nth-child(even) td { background: #FAFCFB; }
 .delta-pos { color: var(--green); font-weight: 600; }
 .delta-neg { color: var(--red); font-weight: 600; }
@@ -116,7 +116,7 @@ table.kpi-table tr:nth-child(even) td { background: #FAFCFB; }
 /* ── NOTIZEN ─────────────────────────────────────────────────── */
 .notes-block { margin-bottom: 12px; }
 .notes-block label { font-size: 12px; font-weight: 600; color: var(--gray-med); display: block; margin-bottom: 4px; }
-.notes-block textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 4px;
+.notes-block textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px;
   font-family: var(--font); font-size: 13px; color: var(--gray-dark); background: #FAFCFB;
   resize: vertical; min-height: 72px; }
 
@@ -137,7 +137,7 @@ table.kpi-table tr:nth-child(even) td { background: #FAFCFB; }
 .beschluss-item select { width: 100%; padding: 10px 8px; border: 1px solid var(--border);
   border-radius: 6px; font-family: var(--font); font-size: 13px; background: #FAFCFB; }
 .beschluss-item .del-btn { padding: 6px 8px; font-size: 15px; cursor: pointer; background: none;
-  border: none; color: #ccc; align-self: center; border-radius: 4px; transition: all .2s; }
+  border: none; color: #ccc; align-self: center; border-radius: 6px; transition: all .2s; }
 .beschluss-item .del-btn:hover { color: var(--red); background: #fde8e8; transform: scale(1.15); }
 
 /* ── TASK TRACKER ────────────────────────────────────────────── */
@@ -160,11 +160,11 @@ table.task-table tr:nth-child(even) td { background: #FAFCFB; }
 table.task-table td input[type=text], table.task-table td input[type=date] {
   width: 100%; border: none; background: transparent; font-family: var(--font);
   font-size: 12px; color: var(--gray-dark); outline: none; }
-table.task-table td input:focus { background: var(--green-light); border-radius: 3px; padding: 2px 4px; }
+table.task-table td input:focus { background: var(--green-light); border-radius: 6px; padding: 2px 4px; }
 table.task-table td.td-status select { width: 100%; font-size: 11px; padding: 3px 4px;
-  border-radius: 3px; border: 1px solid var(--border); font-family: var(--font); }
+  border-radius: 6px; border: 1px solid var(--border); font-family: var(--font); }
 table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 4px;
-  border-radius: 3px; border: 1px solid var(--border); font-family: var(--font); }
+  border-radius: 6px; border: 1px solid var(--border); font-family: var(--font); }
 
 .status-open    { background: #FFF3CD !important; }
 .status-done    { background: #D4EDDA !important; }
@@ -172,7 +172,7 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
 .status-dropped { background: #EBEBEB !important; color: #999 !important; text-decoration: line-through; }
 
 .td-actions button { background: none; border: none; cursor: pointer; font-size: 16px;
-  padding: 4px 6px; color: #ccc; border-radius: 4px; transition: all .2s; }
+  padding: 4px 6px; color: #ccc; border-radius: 6px; transition: all .2s; }
 .td-actions button:hover { color: var(--red); background: #fde8e8; transform: scale(1.15); }
 
 .add-task-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
@@ -431,9 +431,9 @@ if(sessionStorage.getItem('hh-auth')==='1'){
     </table>
   </div>
   <div class="add-task-row no-print" style="margin-top:10px">
-    <input type="text" id="ag-thema" placeholder="Agenda-Punkt / Thema …" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
-    <input type="text" id="ag-ent"   placeholder="Entscheidung" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
-    <input type="text" id="ag-ver"   placeholder="Verantwortlich" style="width:150px;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
+    <input type="text" id="ag-thema" placeholder="Agenda-Punkt / Thema …" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
+    <input type="text" id="ag-ent"   placeholder="Entscheidung" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
+    <input type="text" id="ag-ver"   placeholder="Verantwortlich" style="width:150px;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
     <button class="btn btn-primary" onclick="addAgendaItem()">+ Punkt</button>
   </div>
 </div>
