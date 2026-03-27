@@ -294,24 +294,38 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   <div style="background:#fff;border:1px solid #C8DDD4;border-radius:8px;padding:40px 36px;max-width:380px;width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);">
     <div style="font-size:28px;margin-bottom:8px;">🔒</div>
     <h2 style="font-size:18px;font-weight:700;color:#00843D;margin-bottom:4px;">Helfende Hände Group</h2>
-    <p style="font-size:13px;color:#5C5C5C;margin-bottom:20px;">Bitte Passwort eingeben, um fortzufahren.</p>
+    <p style="font-size:13px;color:#5C5C5C;margin-bottom:20px;">Bitte anmelden, um fortzufahren.</p>
+    <input id="user-input" type="email" placeholder="E-Mail-Adresse"
+      style="width:100%;padding:10px 14px;border:1px solid #C8DDD4;border-radius:4px;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;"
+      onkeydown="if(event.key==='Enter')document.getElementById('pw-input').focus()">
     <input id="pw-input" type="password" placeholder="Passwort"
       style="width:100%;padding:10px 14px;border:1px solid #C8DDD4;border-radius:4px;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;"
       onkeydown="if(event.key==='Enter')document.getElementById('pw-btn').click()">
     <button id="pw-btn" onclick="checkPw()"
       style="width:100%;padding:10px;background:#00843D;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;">Anmelden</button>
-    <p id="pw-error" style="color:#CC0000;font-size:12px;margin-top:10px;display:none;">Falsches Passwort.</p>
+    <p id="pw-error" style="color:#CC0000;font-size:12px;margin-top:10px;display:none;"></p>
   </div>
 </div>
 <script>
+var allowedUsers=['stephan.clara@helfende-haende.de','karl.pfeifer@helfende-haende.de'];
 function checkPw(){
+  var email=document.getElementById('user-input').value.trim().toLowerCase();
+  var errEl=document.getElementById('pw-error');
+  if(!allowedUsers.includes(email)){
+    errEl.textContent='Unbekannte E-Mail-Adresse.';
+    errEl.style.display='block';
+    document.getElementById('user-input').focus();
+    return;
+  }
   var h='o~mmF0*o~ptf\x7f*u~es~p';var k=7;var p='';
   for(var i=0;i<h.length;i++)p+=String.fromCharCode(h.charCodeAt(i)^k);
   if(document.getElementById('pw-input').value===p){
     document.getElementById('pw-overlay').style.display='none';
     sessionStorage.setItem('hh-auth','1');
+    sessionStorage.setItem('hh-user',email);
   } else {
-    document.getElementById('pw-error').style.display='block';
+    errEl.textContent='Falsches Passwort.';
+    errEl.style.display='block';
     document.getElementById('pw-input').value='';
     document.getElementById('pw-input').focus();
   }
