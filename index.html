@@ -27,7 +27,7 @@
   --purple:      #8B2B8B;
   --purple-light:#D4A0C8;
   --border:      #C8DDD4;
-  --font: 'Segoe UI', Arial, sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); background: #F5F7F6; }
 
@@ -64,14 +64,20 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 .status-dot.connected { background: var(--green); box-shadow: 0 0 4px var(--green); }
 .status-dot.error { background: var(--red); }
 .status-dot.pending { background: var(--amber); }
-.btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;
-  font-size: 13px; font-weight: 600; font-family: var(--font); transition: opacity .15s; }
-.btn:hover { opacity: .85; }
+.btn { padding: 9px 20px; border: none; border-radius: 980px; cursor: pointer;
+  font-size: 14px; font-weight: 400; font-family: var(--font); letter-spacing: -.01em;
+  transition: background .3s ease, color .3s ease, transform .15s ease; }
+.btn:hover { transform: scale(1.02); }
+.btn:active { transform: scale(.98); }
 .btn-primary   { background: var(--green); color: #fff; }
-.btn-secondary { background: var(--green-light); color: var(--green); border: 1px solid var(--green-muted); }
-.btn-danger    { background: #fde8e8; color: var(--red); border: 1px solid #f5b8b8; }
+.btn-primary:hover { background: #006B31; }
+.btn-secondary { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+.btn-secondary:hover { background: var(--green); color: #fff; }
+.btn-danger    { background: transparent; color: var(--red); border: 1.5px solid var(--red); }
+.btn-danger:hover { background: var(--red); color: #fff; }
 .btn-print     { background: var(--gray-dark); color: #fff; }
-.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-print:hover { background: #2A2A2A; }
+.btn-sm { padding: 5px 14px; font-size: 12px; }
 
 /* ── SECTION ─────────────────────────────────────────────────── */
 .section { background: var(--white); border: 1px solid var(--border); border-radius: 6px;
@@ -332,13 +338,14 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
     <h2 style="font-size:20px;font-weight:700;color:#00843D;margin-bottom:4px;">Helfende Hände Group</h2>
     <p style="font-size:13px;color:#5C5C5C;margin-bottom:20px;">Bitte anmelden, um fortzufahren.</p>
     <input id="user-input" type="email" placeholder="E-Mail-Adresse"
-      style="width:100%;padding:10px 14px;border:1px solid #C8DDD4;border-radius:4px;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;"
+      style="width:100%;padding:12px 16px;border:1px solid #C8DDD4;border-radius:980px;font-size:15px;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif;margin-bottom:14px;text-align:center;outline:none;transition:border-color .3s ease,box-shadow .3s ease;"
       onkeydown="if(event.key==='Enter')document.getElementById('pw-input').focus()">
     <input id="pw-input" type="password" placeholder="Passwort"
-      style="width:100%;padding:10px 14px;border:1px solid #C8DDD4;border-radius:4px;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;"
+      style="width:100%;padding:12px 16px;border:1px solid #C8DDD4;border-radius:980px;font-size:15px;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif;margin-bottom:14px;text-align:center;outline:none;transition:border-color .3s ease,box-shadow .3s ease;"
       onkeydown="if(event.key==='Enter')document.getElementById('pw-btn').click()">
     <button id="pw-btn" onclick="checkPw()"
-      style="width:100%;padding:10px;background:#00843D;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer;">Anmelden</button>
+      style="width:100%;padding:12px;background:#00843D;color:#fff;border:none;border-radius:980px;font-size:15px;font-weight:400;cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif;letter-spacing:-.01em;transition:background .3s ease,transform .15s ease;"
+      onmouseover="this.style.background='#006B31'" onmouseout="this.style.background='#00843D'">Anmelden</button>
     <p id="pw-error" style="color:#CC0000;font-size:12px;margin-top:10px;display:none;"></p>
   </div>
 </div>
