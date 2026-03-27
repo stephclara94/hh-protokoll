@@ -136,9 +136,10 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
   .doc-header .brand-name { font-size: 17px; }
   .doc-header .header-right { width: 100%; justify-content: space-between; }
   .stats-bar { gap: 8px; }
-  .stat-card { min-width: 0; padding: 10px 12px; }
+  .stat-card { min-width: 0; padding: 10px 12px; overflow: hidden; }
   .stat-card .stat-value { font-size: 20px; }
-  .stat-card .stat-label { font-size: 11px; }
+  .stat-card .stat-label { font-size: 10px; word-break: break-word; hyphens: auto; }
+  .toolbar { margin-top: 6px; }
   .controls { flex-direction: column; }
   .controls input, .controls select { width: 100%; min-width: 0; box-sizing: border-box; }
   .archiv-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
