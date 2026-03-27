@@ -255,28 +255,6 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   .sig-section { page-break-before: always; }
 }
 
-/* ── ARCHIV ──────────────────────────────────────────────────── */
-.archiv-wrap { display:none; background: var(--white); border: 1px solid var(--border);
-  border-radius: 6px; padding: 20px 22px; margin-bottom: 18px; }
-.archiv-wrap.open { display: block; }
-.archiv-tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--green); }
-.archiv-tab { padding: 8px 20px; cursor: pointer; font-size: 13px; font-weight: 600;
-  color: var(--gray-med); border-radius: 4px 4px 0 0; border: 1px solid transparent;
-  border-bottom: none; margin-bottom: -2px; background: transparent; font-family: var(--font); }
-.archiv-tab.active { background: var(--green); color: #fff; border-color: var(--green); }
-.archiv-tab:not(.active):hover { background: var(--green-light); color: var(--green); }
-.archiv-controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
-.archiv-controls input, .archiv-controls select {
-  padding: 7px 10px; border: 1px solid var(--border); border-radius: 4px;
-  font-family: var(--font); font-size: 13px; background: #FAFCFB; color: var(--gray-dark); }
-.archiv-controls input { flex: 1; min-width: 180px; }
-.archiv-month-group { margin-bottom: 20px; }
-.archiv-month-label { font-size: 13px; font-weight: 700; color: var(--green);
-  padding: 6px 10px; background: var(--green-light); border-radius: 4px;
-  margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-.archiv-month-label span { font-size: 11px; color: var(--gray-med); font-weight: 400; }
-.archiv-empty { color: var(--gray-med); font-size: 13px; padding: 16px 0; text-align: center; }
-
 /* ── SIGNATURE BLOCK (always visible in print) ───────────────── */
 .sig-section { margin-top: 24px; }
 .sig-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-top: 16px; max-width: 560px; }
@@ -355,7 +333,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <!-- TOOLBAR -->
 <div class="toolbar no-print">
   <button class="btn btn-secondary" onclick="newMonth()">📋 Neuer Monat</button>
-  <button class="btn btn-secondary" onclick="toggleArchiv()">🗂 Archiv</button>
+  <a href="archiv.html" class="btn btn-secondary" style="text-decoration:none;">🗂 Archiv</a>
   <button class="btn btn-print" onclick="window.print()">🖨 Drucken / PDF</button>
   <button class="btn btn-danger btn-sm" onclick="clearAll()" title="Alle Daten löschen">🗑 Reset</button>
   <span id="save-status">Nicht gespeichert</span>
@@ -449,30 +427,6 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 
 
 
-
-<!-- ── ARCHIV ──────────────────────────────────────────────────── -->
-<div class="archiv-wrap no-print" id="archiv-panel">
-  <div class="section-title" style="margin-bottom:16px">🗂 &nbsp;Archiv vergangener Monate</div>
-  <div class="archiv-tabs">
-    <button class="archiv-tab active" onclick="switchArchivTab('agenda',this)">Agenda</button>
-    <button class="archiv-tab" onclick="switchArchivTab('beschluesse',this)">Beschlüsse</button>
-    <button class="archiv-tab" onclick="switchArchivTab('tasks',this)">Aufgaben</button>
-  </div>
-  <div class="archiv-controls">
-    <input type="text" id="archiv-search" placeholder="🔍 Suchen …" oninput="renderArchiv()">
-    <select id="archiv-month-filter" onchange="renderArchiv()">
-      <option value="">Alle Monate</option>
-    </select>
-    <select id="archiv-status-filter" onchange="renderArchiv()" style="display:none">
-      <option value="">Alle Status</option>
-      <option value="OFFEN">OFFEN</option>
-      <option value="ERLEDIGT">ERLEDIGT</option>
-      <option value="VERZÖGERT">VERZÖGERT</option>
-      <option value="ENTFÄLLT">ENTFÄLLT</option>
-    </select>
-  </div>
-  <div id="archiv-body"></div>
-</div>
 
 <!-- ── 9. UNTERSCHRIFTEN ─────────────────────────────────────── -->
 <div class="section sig-section">
@@ -677,134 +631,6 @@ function newMonth() {
   state.beschluesse = [];
   renderAll(); markDirty();
   alert('Neuer Monat gestartet. ' + state.tasks.length + ' Aufgabe(n) übernommen.\n' + label + ' wurde ins Archiv verschoben.');
-}
-
-// ── ARCHIV ────────────────────────────────────────────────────
-let currentArchivTab = 'agenda';
-
-function toggleArchiv() {
-  const panel = document.getElementById('archiv-panel');
-  panel.classList.toggle('open');
-  if (panel.classList.contains('open')) renderArchiv();
-}
-
-function switchArchivTab(tab, btn) {
-  currentArchivTab = tab;
-  document.querySelectorAll('.archiv-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  // Show status filter only for tasks
-  document.getElementById('archiv-status-filter').style.display = tab==='tasks' ? 'block' : 'none';
-  renderArchiv();
-}
-
-function renderArchiv() {
-  const archiv  = state.archiv || [];
-  const search  = (document.getElementById('archiv-search').value || '').toLowerCase();
-  const monthF  = document.getElementById('archiv-month-filter').value;
-  const statusF = document.getElementById('archiv-status-filter').value;
-  const body    = document.getElementById('archiv-body');
-
-  // Rebuild month filter dropdown
-  const monthSel = document.getElementById('archiv-month-filter');
-  const curVal   = monthSel.value;
-  monthSel.innerHTML = '<option value="">Alle Monate</option>';
-  archiv.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m.date; opt.textContent = m.label;
-    if (m.date === curVal) opt.selected = true;
-    monthSel.appendChild(opt);
-  });
-
-  if (archiv.length === 0) {
-    body.innerHTML = '<div class="archiv-empty">Noch kein Archiv vorhanden. Starte einen neuen Monat um Einträge zu archivieren.</div>';
-    return;
-  }
-
-  const filtered = monthF ? archiv.filter(m => m.date === monthF) : archiv;
-  let html = '';
-
-  filtered.forEach(month => {
-    if (currentArchivTab === 'agenda') {
-      const items = (month.agenda || []).filter(a =>
-        !search || a.thema.toLowerCase().includes(search) ||
-        (a.ent||'').toLowerCase().includes(search) ||
-        (a.ver||'').toLowerCase().includes(search)
-      );
-      if (items.length === 0 && search) return;
-      html += archivMonthHeader(month, items.length, 'Agenda-Punkte');
-      if (items.length === 0) { html += '<div class="archiv-empty" style="padding:8px 10px">Keine Einträge</div>'; }
-      else {
-        html += '<table class="kpi-table" style="margin-bottom:0"><thead><tr>' +
-          '<th style="width:4%">#</th><th>Thema</th><th style="width:30%">Entscheidung</th><th style="width:18%">Verantwortlich</th>' +
-          '</tr></thead><tbody>';
-        items.forEach((a,i) => {
-          html += `<tr><td style="text-align:center;font-weight:700;color:var(--green)">${i+1}</td>
-            <td>${escH(a.thema)}</td><td>${escH(a.ent||'—')}</td><td>${escH(a.ver||'—')}</td></tr>`;
-        });
-        html += '</tbody></table>';
-      }
-      html += '</div>';
-
-    } else if (currentArchivTab === 'beschluesse') {
-      const items = (month.beschluesse || []).filter(b =>
-        !search || (b.text||'').toLowerCase().includes(search)
-      );
-      if (items.length === 0 && search) return;
-      html += archivMonthHeader(month, items.length, 'Beschlüsse');
-      if (items.length === 0) { html += '<div class="archiv-empty" style="padding:8px 10px">Keine Beschlüsse</div>'; }
-      else {
-        html += '<table class="kpi-table" style="margin-bottom:0"><thead><tr>' +
-          '<th style="width:4%">#</th><th>Beschluss</th><th style="width:16%">Abstimmung</th>' +
-          '</tr></thead><tbody>';
-        items.forEach((b,i) => {
-          html += `<tr><td style="text-align:center;font-weight:700;color:var(--green)">${i+1}</td>
-            <td>${escH(b.text||'—')}</td><td>${escH(b.abstimmung||'—')}</td></tr>`;
-        });
-        html += '</tbody></table>';
-      }
-      html += '</div>';
-
-    } else if (currentArchivTab === 'tasks') {
-      let items = (month.tasks || []).filter(t =>
-        (!search || (t.desc||'').toLowerCase().includes(search) ||
-          (t.person||'').toLowerCase().includes(search)) &&
-        (!statusF || t.status === statusF)
-      );
-      if (items.length === 0 && (search || statusF)) return;
-      html += archivMonthHeader(month, items.length, 'Aufgaben');
-      if (items.length === 0) { html += '<div class="archiv-empty" style="padding:8px 10px">Keine Aufgaben</div>'; }
-      else {
-        const STATUS_BG = {'OFFEN':'#FFF3CD','ERLEDIGT':'#D4EDDA','VERZÖGERT':'#FDECEA','ENTFÄLLT':'#EBEBEB'};
-        html += '<table class="task-table" style="margin-bottom:0"><thead><tr>' +
-          '<th style="width:4%">#</th><th style="width:6%">Prio</th><th>Aufgabe</th>' +
-          '<th style="width:14%">Verantwortlich</th><th style="width:10%">Fällig</th>' +
-          '<th style="width:10%">Erledigt</th><th style="width:10%">Status</th>' +
-          '</tr></thead><tbody>';
-        const PRIO_ICONS = {'Hoch':'🔴','Mittel':'🟡','Niedrig':'🟢'};
-        items.forEach((t,i) => {
-          const bg = STATUS_BG[t.status] || '';
-          html += `<tr style="background:${bg}">
-            <td style="text-align:center;font-weight:700;color:var(--green)">${i+1}</td>
-            <td>${PRIO_ICONS[t.prio]||''} ${escH(t.prio||'')}</td>
-            <td>${escH(t.desc||'')}</td>
-            <td>${escH(t.person||'—')}</td>
-            <td>${t.due||'—'}</td>
-            <td>${t.done||'—'}</td>
-            <td><strong>${escH(t.status||'')}</strong></td></tr>`;
-        });
-        html += '</tbody></table>';
-      }
-      html += '</div>';
-    }
-  });
-
-  body.innerHTML = html || '<div class="archiv-empty">Keine Ergebnisse für diese Suche.</div>';
-}
-
-function archivMonthHeader(month, count, label) {
-  return `<div class="archiv-month-group"><div class="archiv-month-label">
-    📅 ${month.label} ${month.teilnehmer ? '· '+escH(month.teilnehmer) : ''}
-    <span>${count} ${label}</span></div>`;
 }
 
 // ── BIND META ─────────────────────────────────────────────────
