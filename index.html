@@ -654,6 +654,7 @@ function addTask() {
   document.getElementById('nt-desc').value   = '';
   document.getElementById('nt-person').value = '';
   document.getElementById('nt-due').value    = '';
+  setDefaultDueDate();
   renderTasks(); markDirty();
 }
 
@@ -692,6 +693,17 @@ function bindMeta() {
     if (el) el.addEventListener('input', () => { collectMeta(); markDirty(); });
   });
   document.getElementById('m-date')?.addEventListener('input', updateHeaderPeriod);
+  document.getElementById('m-date')?.addEventListener('input', setDefaultDueDate);
+}
+function setDefaultDueDate() {
+  const dueEl = document.getElementById('nt-due');
+  if (!dueEl || dueEl.value) return; // don't overwrite if already set
+  const jfDate = document.getElementById('m-date')?.value;
+  if (jfDate) {
+    const d = new Date(jfDate);
+    d.setDate(d.getDate() + 7);
+    dueEl.value = d.toISOString().slice(0, 10);
+  }
 }
 function collectMeta() {
   ['m-date','m-teilnehmer'].forEach(id => {
@@ -833,6 +845,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('m-date').value = new Date().toISOString().slice(0,10);
     updateHeaderPeriod();
   }
+  setDefaultDueDate();
   const tnEl = document.getElementById('m-teilnehmer');
   if (tnEl && !state.meta['m-teilnehmer']) { tnEl.value = 'Stephan Clara, Karl Pfeifer'; state.meta['m-teilnehmer'] = 'Stephan Clara, Karl Pfeifer'; }
   setStatus(loadedFromServer ? 'Von Supabase geladen' : 'Bereit', 'ok');
