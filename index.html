@@ -181,15 +181,17 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   .doc-header .brand-name { font-size: 17px; }
   .doc-header .header-right { width: 100%; justify-content: space-between; }
   .meta-grid { grid-template-columns: 1fr; }
-  .section { padding: 14px 14px; }
+  .section { padding: 14px 14px; overflow-x: hidden; }
   .toolbar { gap: 6px; padding: 8px 0; }
   .toolbar .btn { padding: 6px 10px; font-size: 12px; }
-  .beschluss-item { grid-template-columns: 28px 1fr 120px 34px; gap: 6px; }
+  .beschluss-item { grid-template-columns: 28px 1fr 100px 34px; gap: 6px; }
   .add-task-row { flex-direction: column; }
-  .add-task-row input, .add-task-row select { width: 100% !important; min-width: 0 !important; }
+  .add-task-row input, .add-task-row select, .add-task-row .btn { width: 100% !important; min-width: 0 !important; max-width: 100% !important; box-sizing: border-box !important; }
   table.task-table { font-size: 11px; min-width: 580px; }
   table.task-table th { font-size: 10px; padding: 6px 5px; }
   .sig-grid { grid-template-columns: 1fr; gap: 24px; }
+  .section-title { font-size: 14px; }
+  .kpi-table { display: block; overflow-x: auto; }
 }
 
 /* ── LOGIN ANIMATION ────────────────────────────────────────── */
@@ -406,9 +408,9 @@ if(sessionStorage.getItem('hh-auth')==='1'){
     </table>
   </div>
   <div class="add-task-row no-print" style="margin-top:10px">
-    <input type="text" id="ag-thema" placeholder="Agenda-Punkt / Thema …" style="flex:1;min-width:200px;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
-    <input type="text" id="ag-ent"   placeholder="Entscheidung" style="width:200px;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
-    <input type="text" id="ag-ver"   placeholder="Verantwortlich" style="width:150px;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
+    <input type="text" id="ag-thema" placeholder="Agenda-Punkt / Thema …" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
+    <input type="text" id="ag-ent"   placeholder="Entscheidung" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
+    <input type="text" id="ag-ver"   placeholder="Verantwortlich" style="width:150px;min-width:0;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-family:var(--font);font-size:13px;background:#FAFCFB;">
     <button class="btn btn-primary" onclick="addAgendaItem()">+ Punkt</button>
   </div>
 </div>
