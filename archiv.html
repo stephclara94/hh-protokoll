@@ -131,19 +131,27 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
 
 /* ── MOBILE ── */
 @media (max-width: 640px) {
-  .page-wrap { padding: 16px 12px 40px; }
+  .page-wrap { padding: 16px 12px 40px; overflow-x: hidden; }
   .doc-header { flex-direction: column; gap: 8px; align-items: flex-start; padding: 12px 14px; margin: -16px -12px 0; }
   .doc-header .brand-name { font-size: 17px; }
+  .doc-header .header-right { width: 100%; justify-content: space-between; }
   .stats-bar { gap: 8px; }
   .stat-card { min-width: 0; padding: 10px 12px; }
   .stat-card .stat-value { font-size: 20px; }
   .stat-card .stat-label { font-size: 11px; }
   .controls { flex-direction: column; }
-  .controls input, .controls select { width: 100%; min-width: 0; }
-  .month-header { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .controls input, .controls select { width: 100%; min-width: 0; box-sizing: border-box; }
+  .archiv-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .archiv-tab { padding: 8px 14px; font-size: 12px; white-space: nowrap; }
+  .month-header { flex-direction: column; gap: 8px; align-items: flex-start; padding: 12px 14px; }
   .month-header .actions { width: 100%; justify-content: flex-end; }
   table.arch-table { font-size: 11px; min-width: 500px; }
   .month-body { padding: 0 10px 12px; overflow-x: auto; }
+  .toolbar { gap: 6px; }
+  .toolbar .btn { padding: 6px 10px; font-size: 12px; }
+  .edit-panel { padding: 20px 16px; width: 100%; max-width: none; margin: 0 8px; box-sizing: border-box; }
+  .edit-field input, .edit-field textarea, .edit-field select { box-sizing: border-box; max-width: 100%; }
+  .edit-field input[type="date"] { height: auto; padding: 8px 10px; -webkit-appearance: none; }
 }
 
 /* ── PRINT ── */
