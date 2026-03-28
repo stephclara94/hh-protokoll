@@ -17,14 +17,53 @@
   --green:       #00843D;
   --green-light: #E8F0EC;
   --green-muted: #A8C8B8;
-  --gray-dark:   #3C3C3C;
-  --gray-med:    #5C5C5C;
-  --gray-light:  #F0F0F0;
+  --gray-dark:   #1D1D1F;
+  --gray-med:    #6E6E73;
+  --gray-light:  #F5F5F7;
   --white:       #FFFFFF;
   --red:         #CC0000;
   --amber:       #E07B00;
-  --border:      #C8DDD4;
+  --border:      rgba(0,132,61,.15);
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* Liquid Glass tokens */
+  --glass-bg:    rgba(255,255,255,.62);
+  --glass-blur:  20px;
+  --glass-border: rgba(255,255,255,.45);
+  --glass-shadow: 0 2px 20px rgba(0,0,0,.06), 0 0 0 .5px rgba(255,255,255,.5) inset;
+  --page-bg:     #F2F4F3;
+  --header-bg:   rgba(255,255,255,.72);
+  --toolbar-bg:  rgba(242,244,243,.82);
+  --input-bg:    rgba(255,255,255,.55);
+  --input-border: rgba(0,0,0,.08);
+  --table-header-bg: var(--green);
+  --table-even:  rgba(0,132,61,.03);
+  --table-hover: rgba(0,132,61,.07);
+  --focus-ring:  rgba(0,132,61,.18);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gray-dark:   #F5F5F7;
+    --gray-med:    #A1A1A6;
+    --gray-light:  #1C1C1E;
+    --white:       #1C1C1E;
+    --green-light: rgba(0,132,61,.15);
+    --green-muted: #2D5E40;
+    --red:         #FF453A;
+    --amber:       #FF9F0A;
+    --border:      rgba(255,255,255,.1);
+    --glass-bg:    rgba(44,44,46,.55);
+    --glass-border: rgba(255,255,255,.08);
+    --glass-shadow: 0 2px 24px rgba(0,0,0,.25), 0 0 0 .5px rgba(255,255,255,.06) inset;
+    --page-bg:     #000000;
+    --header-bg:   rgba(28,28,30,.72);
+    --toolbar-bg:  rgba(0,0,0,.65);
+    --input-bg:    rgba(255,255,255,.06);
+    --input-border: rgba(255,255,255,.1);
+    --table-header-bg: #006B31;
+    --table-even:  rgba(255,255,255,.03);
+    --table-hover: rgba(0,132,61,.18);
+    --focus-ring:  rgba(0,132,61,.3);
+  }
 }
 body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); background: var(--page-bg); -webkit-font-smoothing: antialiased; }
 .page-wrap { max-width: 1060px; margin: 0 auto; padding: 24px 20px 60px; }
@@ -39,6 +78,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 }
 .doc-header .brand { display: flex; align-items: center; gap: 16px; }
 .doc-header .brand-text { display: flex; flex-direction: column; justify-content: center; }
+.doc-header .brand img { border-radius: 10px; }
 .doc-header .brand-name { font-size: 22px; font-weight: 700; color: var(--green); letter-spacing: .2px; line-height: 1.2; }
 .doc-header .brand-sub { font-size: 12px; color: var(--gray-med); margin-top: 3px; }
 .doc-header .header-right { display: flex; align-items: center; gap: 12px; }
@@ -141,6 +181,7 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
   .STATUS_BG_ENTFÄLLT  { background: rgba(142,142,147,.1) !important; }
   .doc-header .brand-name { color: #34C759; }
   .doc-header .badge { background: #FF453A; }
+  .doc-header .brand img, #pw-overlay img { background: rgba(255,255,255,.85); padding: 2px; border-radius: 10px; }
   .month-header .month-title { color: #34C759; }
   .month-header .month-count { background: rgba(52,199,89,.12); color: #34C759; }
   .archiv-tab.active { background: #34C759; color: #000; border-color: #34C759; }
