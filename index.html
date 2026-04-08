@@ -148,10 +148,12 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 .meta-full { grid-column: 1 / -1; }
 
 /* ── KPI TABLE ───────────────────────────────────────────────── */
+.table-rounded { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
 table.kpi-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 table.kpi-table th { background: var(--table-header-bg); color: #fff; padding: 8px 10px; text-align: left;
   font-weight: 600; font-size: 13px; }
 table.kpi-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); transition: background .15s; }
+table.kpi-table td:nth-child(2), table.kpi-table td:nth-child(3) { word-break: break-word; white-space: normal; }
 table.kpi-table tbody tr:hover td { background: var(--table-hover) !important; }
 table.kpi-table td input { width: 100%; border: none; background: transparent; font-family: var(--font);
   font-size: 13px; color: var(--gray-dark); outline: none; }
@@ -198,11 +200,12 @@ table.kpi-table tr:nth-child(even) td { background: var(--table-even); }
 .pill-delayed  { background: rgba(253,236,234,.7); color: var(--red); border: 1px solid rgba(245,184,184,.5); }
 .pill-dropped  { background: rgba(235,235,235,.7); color: #666; border: 1px solid rgba(204,204,204,.5); }
 
-.task-table-wrap { overflow-x: auto; }
+.task-table-wrap { overflow-x: auto; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
 table.task-table { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 700px; }
 table.task-table th { background: var(--table-header-bg); color: #fff; padding: 8px 8px; font-size: 13px;
   font-weight: 600; white-space: nowrap; text-align: left; }
 table.task-table td { padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background .15s; }
+table.task-table td:nth-child(2), table.task-table td:nth-child(3) { word-break: break-word; white-space: normal; }
 table.task-table tbody tr:hover td { background: var(--table-hover) !important; }
 table.task-table tr:nth-child(even) td { background: var(--table-even); }
 table.task-table td input[type=text], table.task-table td input[type=date] {
@@ -495,7 +498,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <div class="section">
   <div class="section-title"><span class="section-num">2</span>Agenda</div>
   <p style="font-size:14px;color:var(--gray-med);margin-bottom:12px;">Agenda-Punkte eintragen – das Protokoll (Abschnitt 4) wird automatisch befüllt.</p>
-  <div class="task-table-wrap">
+  <div class="table-rounded">
     <table class="kpi-table">
       <thead><tr>
         <th style="width:5%">#</th>
