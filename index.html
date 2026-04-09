@@ -196,6 +196,7 @@ table.kpi-table tr:nth-child(even) td { background: var(--table-even); }
 .legend-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px;
   padding: 3px 9px; border-radius: 20px; font-weight: 600; }
 .pill-open     { background: rgba(255,243,205,.7); color: #7A5000; border: 1px solid rgba(245,215,143,.5); }
+.pill-working  { background: rgba(219,234,254,.7); color: #1E40AF; border: 1px solid rgba(147,197,253,.5); }
 .pill-done     { background: rgba(212,237,218,.7); color: #1A5C2E; border: 1px solid rgba(157,207,175,.5); }
 .pill-delayed  { background: rgba(253,236,234,.7); color: var(--red); border: 1px solid rgba(245,184,184,.5); }
 .pill-dropped  { background: rgba(235,235,235,.7); color: #666; border: 1px solid rgba(204,204,204,.5); }
@@ -218,6 +219,7 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   border-radius: 8px; border: 1px solid var(--input-border); font-family: var(--font); background: var(--input-bg); color: var(--gray-dark); }
 
 .status-open    { background: #FFF3CD !important; }
+.status-working { background: #DBEAFE !important; }
 .status-done    { background: #D4EDDA !important; }
 .status-delayed { background: #FDECEA !important; }
 .status-dropped { background: #EBEBEB !important; color: #999 !important; text-decoration: line-through; }
@@ -245,10 +247,12 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
 /* ── DARK MODE OVERRIDES ─────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   .pill-open     { background: rgba(255,159,10,.15); color: #FF9F0A; border-color: rgba(255,159,10,.25); }
+  .pill-working  { background: rgba(59,130,246,.15); color: #60A5FA; border-color: rgba(59,130,246,.25); }
   .pill-done     { background: rgba(0,132,61,.15); color: #34C759; border-color: rgba(0,132,61,.25); }
   .pill-delayed  { background: rgba(255,69,58,.12); color: #FF453A; border-color: rgba(255,69,58,.2); }
   .pill-dropped  { background: rgba(142,142,147,.15); color: #8E8E93; border-color: rgba(142,142,147,.2); }
   .status-open    { background: rgba(255,159,10,.1) !important; }
+  .status-working { background: rgba(59,130,246,.1) !important; }
   .status-done    { background: rgba(0,132,61,.1) !important; }
   .status-delayed { background: rgba(255,69,58,.08) !important; }
   .status-dropped { background: rgba(142,142,147,.1) !important; color: #8E8E93 !important; }
@@ -388,6 +392,7 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   table.task-table tr, table.kpi-table tr { page-break-inside: avoid; }
 
   .status-open    { background: #FFF3CD !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .status-working { background: #DBEAFE !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .status-done    { background: #D4EDDA !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .status-delayed { background: #FDECEA !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .status-dropped { background: #EBEBEB !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -535,6 +540,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
     <div class="legend">
       <span class="legend-pill pill-dropped">● ENTFÄLLT</span>
       <span class="legend-pill pill-open">● OFFEN</span>
+      <span class="legend-pill pill-working">● IN ARBEIT</span>
       <span class="legend-pill pill-delayed">● VERZÖGERT</span>
       <span class="legend-pill pill-done">● ERLEDIGT</span>
     </div>
@@ -543,8 +549,8 @@ if(sessionStorage.getItem('hh-auth')==='1'){
     <table class="task-table">
       <thead><tr>
         <th style="width:4%">#</th>
-        <th style="width:6%">Prio</th>
-        <th style="width:30%">Aufgabe</th>
+        <th style="width:8%">Prio</th>
+        <th style="width:28%">Aufgabe</th>
         <th style="width:15%">Verantwortlich</th>
         <th style="width:11%">Erstellt</th>
         <th style="width:11%">Fällig</th>
@@ -622,10 +628,10 @@ function renderAgenda() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="text-align:center;font-weight:700;color:var(--green);width:4%">${i+1}</td>
-      <td><input type="text" value="${escH(item.thema)}" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;"
-          oninput="state.agenda[${i}].thema=this.value;markDirty();" placeholder="Thema …"></td>
-      <td><input type="text" value="${escH(item.ent||'')}" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;"
-          oninput="state.agenda[${i}].ent=this.value;markDirty();" placeholder="Entscheidung …"></td>
+      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:vertical;min-height:22px;overflow:hidden;"
+          oninput="state.agenda[${i}].thema=this.value;markDirty();this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Thema …">${escH(item.thema)}</textarea></td>
+      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:vertical;min-height:22px;overflow:hidden;"
+          oninput="state.agenda[${i}].ent=this.value;markDirty();this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Entscheidung …">${escH(item.ent||'')}</textarea></td>
       <td><input type="text" value="${escH(item.ver)}" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;"
           oninput="state.agenda[${i}].ver=this.value;markDirty();" placeholder="—"></td>
       <td class="no-print" style="text-align:center">
@@ -694,7 +700,7 @@ function delBeschluss(i) {
 }
 
 // ── UNIFIED TASK TRACKER ──────────────────────────────────────
-const STATUS_CLASSES = { 'OFFEN':'status-open','ERLEDIGT':'status-done','VERZÖGERT':'status-delayed','ENTFÄLLT':'status-dropped' };
+const STATUS_CLASSES = { 'OFFEN':'status-open','IN ARBEIT':'status-working','ERLEDIGT':'status-done','VERZÖGERT':'status-delayed','ENTFÄLLT':'status-dropped' };
 const PRIO_ICONS     = { 'Hoch':'🔴','Mittel':'🟡','Niedrig':'🟢' };
 
 function renderTasks() {
@@ -710,14 +716,15 @@ function renderTasks() {
           ${['Hoch','Mittel','Niedrig'].map(p=>`<option value="${p}" ${t.prio===p?'selected':''}>${PRIO_ICONS[p]} ${p}</option>`).join('')}
         </select>
       </td>
-      <td><input type="text" value="${escH(t.desc)}" oninput="updateTask(${i},'desc',this.value)" placeholder="Aufgabe …"></td>
+      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:12px;resize:vertical;min-height:20px;overflow:hidden;"
+          oninput="updateTask(${i},'desc',this.value);this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Aufgabe …">${escH(t.desc)}</textarea></td>
       <td><input type="text" value="${escH(t.person)}" oninput="updateTask(${i},'person',this.value)" placeholder="Name"></td>
       <td><input type="date" value="${t.created||''}" onchange="updateTask(${i},'created',this.value)"></td>
       <td><input type="date" value="${t.due||''}" onchange="updateTask(${i},'due',this.value)"></td>
       <td><input type="date" value="${t.done||''}" onchange="updateTask(${i},'done',this.value)"></td>
       <td class="td-status">
         <select onchange="updateTaskStatus(${i},this.value)">
-          ${['ENTFÄLLT','OFFEN','VERZÖGERT','ERLEDIGT'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
+          ${['ENTFÄLLT','OFFEN','IN ARBEIT','VERZÖGERT','ERLEDIGT'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
       <td class="td-actions no-print"><button onclick="delTask(${i})" title="Löschen">✕</button></td>`;
@@ -789,7 +796,7 @@ function newMonth() {
   state.archiv.unshift(archiveEntry); // newest first
 
   // Keep only open/delayed tasks
-  state.tasks       = state.tasks.filter(t => t.status==='OFFEN' || t.status==='VERZÖGERT');
+  state.tasks       = state.tasks.filter(t => t.status==='OFFEN' || t.status==='IN ARBEIT' || t.status==='VERZÖGERT');
   state.meta        = {};
   state.agenda      = [];
   state.beschluesse = [];

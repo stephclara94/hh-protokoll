@@ -150,8 +150,9 @@ table.arch-table td input, table.arch-table td textarea {
   font-family: var(--font); font-size: 12px; background: var(--input-bg); color: var(--gray-dark); }
 table.arch-table td textarea { resize: vertical; min-height: 36px; }
 
-.STATUS_BG_OFFEN    { background: #FFF3CD !important; }
-.STATUS_BG_ERLEDIGT { background: #D4EDDA !important; }
+.STATUS_BG_OFFEN      { background: #FFF3CD !important; }
+.STATUS_BG_IN_ARBEIT  { background: #DBEAFE !important; }
+.STATUS_BG_ERLEDIGT   { background: #D4EDDA !important; }
 .STATUS_BG_VERZÖGERT { background: #FDECEA !important; }
 .STATUS_BG_ENTFÄLLT  { background: #EBEBEB !important; }
 
@@ -328,6 +329,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   <select id="status-filter" onchange="renderArchiv()" style="display:none">
     <option value="">Alle Status</option>
     <option value="OFFEN">OFFEN</option>
+    <option value="IN ARBEIT">IN ARBEIT</option>
     <option value="ERLEDIGT">ERLEDIGT</option>
     <option value="VERZÖGERT">VERZÖGERT</option>
     <option value="ENTFÄLLT">ENTFÄLLT</option>
@@ -355,7 +357,7 @@ let state = { archiv: [] };
 // ── HELPERS ──
 function escH(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 const PRIO_ICONS = { 'Hoch': '🔴', 'Mittel': '🟡', 'Niedrig': '🟢' };
-const STATUS_BG = { 'OFFEN': 'STATUS_BG_OFFEN', 'ERLEDIGT': 'STATUS_BG_ERLEDIGT', 'VERZÖGERT': 'STATUS_BG_VERZÖGERT', 'ENTFÄLLT': 'STATUS_BG_ENTFÄLLT' };
+const STATUS_BG = { 'OFFEN': 'STATUS_BG_OFFEN', 'IN ARBEIT': 'STATUS_BG_IN_ARBEIT', 'ERLEDIGT': 'STATUS_BG_ERLEDIGT', 'VERZÖGERT': 'STATUS_BG_VERZÖGERT', 'ENTFÄLLT': 'STATUS_BG_ENTFÄLLT' };
 
 // ── LOAD DATA ──
 async function loadData() {
@@ -582,6 +584,7 @@ function editMonth(idx) {
       <div class="edit-field"><input value="${escH(t.person || '')}" onchange="updateTask(${i},'person',this.value)" placeholder="Verantwortlich"></div>
       <div class="edit-field"><select onchange="updateTask(${i},'status',this.value)">
         <option ${t.status === 'OFFEN' ? 'selected' : ''}>OFFEN</option>
+        <option ${t.status === 'IN ARBEIT' ? 'selected' : ''}>IN ARBEIT</option>
         <option ${t.status === 'ERLEDIGT' ? 'selected' : ''}>ERLEDIGT</option>
         <option ${t.status === 'VERZÖGERT' ? 'selected' : ''}>VERZÖGERT</option>
         <option ${t.status === 'ENTFÄLLT' ? 'selected' : ''}>ENTFÄLLT</option>
