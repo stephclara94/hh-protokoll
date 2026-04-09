@@ -779,8 +779,11 @@ function printPDF() {
 }
 
 // ── NEW MONTH ─────────────────────────────────────────────────
-function newMonth() {
+async function newMonth() {
   if (!confirm('Neuen Monat starten?\n\nAlle Agenda-Punkte, Beschlüsse und erledigte/entfallene Aufgaben werden ins Archiv verschoben.\nOffene & verzögerte Aufgaben bleiben bestehen.\nBitte vorher speichern!')) return;
+
+  // Backup before archiving
+  await createBackup();
 
   // Archive current month
   const dateVal = document.getElementById('m-date').value;
@@ -858,12 +861,38 @@ async function saveData() {
     if (error) throw error;
     localStorage.setItem('mbr_current', JSON.stringify(state));
     setStatus('Gespeichert – ' + new Date().toLocaleTimeString('de-DE'), 'ok');
+    // Daily auto-backup
+    const today = new Date().toISOString().slice(0,10);
+    if (localStorage.getItem('hh-backup-date') !== today) {
+      const ok = await createBackup();
+      if (ok) localStorage.setItem('hh-backup-date', today);
+    }
   } catch(e) {
     localStorage.setItem('mbr_current', JSON.stringify(state));
     setStatus('Lokal gespeichert (Supabase nicht erreichbar)', 'error');
     console.warn('Supabase-Speichern fehlgeschlagen:', e);
   }
 }
+async function createBackup() {
+  try {
+    collectMeta();
+    const now = new Date();
+    const id = 'backup_' + now.getFullYear() + '-'
+      + String(now.getMonth()+1).padStart(2,'0') + '-'
+      + String(now.getDate()).padStart(2,'0') + '_'
+      + String(now.getHours()).padStart(2,'0')
+      + String(now.getMinutes()).padStart(2,'0')
+      + String(now.getSeconds()).padStart(2,'0');
+    const { error } = await sb.from('protokoll').insert({ id, data: JSON.parse(JSON.stringify(state)), updated_at: now.toISOString() });
+    if (error) throw error;
+    console.log('Backup erstellt:', id);
+    return true;
+  } catch(e) {
+    console.warn('Backup fehlgeschlagen:', e);
+    return false;
+  }
+}
+
 async function loadData() {
   setStatus('Laden …', 'pending');
   try {
