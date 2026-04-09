@@ -933,6 +933,7 @@ function applyLoadedState(loaded) {
   state.meta        = loaded.meta        || {};
   state.agenda      = loaded.agenda      || [];
   state.beschluesse = loaded.beschluesse || [];
+  state.archiv      = loaded.archiv      || state.archiv || [];
   if (loaded.tasks) {
     state.tasks = loaded.tasks;
   } else {
