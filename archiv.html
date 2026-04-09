@@ -365,7 +365,7 @@ async function loadData() {
   if (error) {
     document.getElementById('status-msg').textContent = 'Fehler beim Laden: ' + error.message;
     // fallback localStorage
-    const ls = localStorage.getItem('hh-protokoll');
+    const ls = localStorage.getItem('mbr_current');
     if (ls) state = JSON.parse(ls);
     return;
   }
@@ -376,7 +376,7 @@ async function loadData() {
 }
 
 async function saveState() {
-  localStorage.setItem('hh-protokoll', JSON.stringify(state));
+  localStorage.setItem('mbr_current', JSON.stringify(state));
   const { error } = await sb.from('protokoll').update({ data: state }).eq('id', 'current');
   if (error) {
     document.getElementById('status-msg').textContent = 'Speicherfehler: ' + error.message;
