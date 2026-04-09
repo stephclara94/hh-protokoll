@@ -628,9 +628,9 @@ function renderAgenda() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="text-align:center;font-weight:700;color:var(--green);width:4%">${i+1}</td>
-      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:vertical;min-height:22px;overflow:hidden;"
+      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:none;min-height:22px;overflow:hidden;"
           oninput="state.agenda[${i}].thema=this.value;markDirty();this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Thema …">${escH(item.thema)}</textarea></td>
-      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:vertical;min-height:22px;overflow:hidden;"
+      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:none;min-height:22px;overflow:hidden;"
           oninput="state.agenda[${i}].ent=this.value;markDirty();this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Entscheidung …">${escH(item.ent||'')}</textarea></td>
       <td><input type="text" value="${escH(item.ver)}" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;"
           oninput="state.agenda[${i}].ver=this.value;markDirty();" placeholder="—"></td>
@@ -642,6 +642,7 @@ function renderAgenda() {
   if (state.agenda.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="color:var(--gray-med);font-size:12px;padding:10px 8px;">Noch keine Agenda-Punkte erfasst.</td></tr>';
   }
+  autoResizeAll(tbody);
 }
 
 function addAgendaItem() {
@@ -716,7 +717,7 @@ function renderTasks() {
           ${['Hoch','Mittel','Niedrig'].map(p=>`<option value="${p}" ${t.prio===p?'selected':''}>${PRIO_ICONS[p]} ${p}</option>`).join('')}
         </select>
       </td>
-      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:12px;resize:vertical;min-height:20px;overflow:hidden;"
+      <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:12px;resize:none;min-height:20px;overflow:hidden;"
           oninput="updateTask(${i},'desc',this.value);this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Aufgabe …">${escH(t.desc)}</textarea></td>
       <td><input type="text" value="${escH(t.person)}" oninput="updateTask(${i},'person',this.value)" placeholder="Name"></td>
       <td><input type="date" value="${t.created||''}" onchange="updateTask(${i},'created',this.value)"></td>
@@ -733,6 +734,7 @@ function renderTasks() {
   if (state.tasks.length === 0) {
     body.innerHTML = '<tr><td colspan="9" style="color:var(--gray-med);font-size:14px;padding:10px 8px;">Keine Aufgaben erfasst.</td></tr>';
   }
+  autoResizeAll(body);
 }
 function updateTask(i, field, val) {
   state.tasks[i][field] = val; markDirty();
@@ -919,6 +921,9 @@ function renderAll() {
 
 // ── UTILS ─────────────────────────────────────────────────────
 function escH(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function autoResizeAll(container) {
+  (container || document).querySelectorAll('textarea').forEach(ta => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
+}
 
 // ── AUTOSAVE every 60s ────────────────────────────────────────
 setInterval(() => { collectMeta(); saveData(); }, 60000);
