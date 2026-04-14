@@ -10,6 +10,16 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <title>Helfende Hände – Archiv</title>
+<script>
+  (function(){
+    try {
+      var saved = localStorage.getItem('hh-theme');
+      var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var theme = saved || (sysDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+  })();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,30 +50,28 @@
   --table-hover: rgba(0,132,61,.07);
   --focus-ring:  rgba(0,132,61,.18);
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --gray-dark:   #F5F5F7;
-    --gray-med:    #A1A1A6;
-    --gray-light:  #1C1C1E;
-    --white:       #1C1C1E;
-    --green-light: rgba(0,132,61,.15);
-    --green-muted: #2D5E40;
-    --red:         #FF453A;
-    --amber:       #FF9F0A;
-    --border:      rgba(255,255,255,.1);
-    --glass-bg:    rgba(44,44,46,.55);
-    --glass-border: rgba(255,255,255,.08);
-    --glass-shadow: 0 2px 24px rgba(0,0,0,.25), 0 0 0 .5px rgba(255,255,255,.06) inset;
-    --page-bg:     #000000;
-    --header-bg:   rgba(28,28,30,.72);
-    --toolbar-bg:  rgba(0,0,0,.65);
-    --input-bg:    rgba(255,255,255,.06);
-    --input-border: rgba(255,255,255,.1);
-    --table-header-bg: #006B31;
-    --table-even:  rgba(255,255,255,.03);
-    --table-hover: rgba(0,132,61,.18);
-    --focus-ring:  rgba(0,132,61,.3);
-  }
+:root[data-theme="dark"] {
+  --gray-dark:   #F5F5F7;
+  --gray-med:    #A1A1A6;
+  --gray-light:  #1C1C1E;
+  --white:       #1C1C1E;
+  --green-light: rgba(0,132,61,.15);
+  --green-muted: #2D5E40;
+  --red:         #FF453A;
+  --amber:       #FF9F0A;
+  --border:      rgba(255,255,255,.1);
+  --glass-bg:    rgba(44,44,46,.55);
+  --glass-border: rgba(255,255,255,.08);
+  --glass-shadow: 0 2px 24px rgba(0,0,0,.25), 0 0 0 .5px rgba(255,255,255,.06) inset;
+  --page-bg:     #000000;
+  --header-bg:   rgba(28,28,30,.72);
+  --toolbar-bg:  rgba(0,0,0,.65);
+  --input-bg:    rgba(255,255,255,.06);
+  --input-border: rgba(255,255,255,.1);
+  --table-header-bg: #006B31;
+  --table-even:  rgba(255,255,255,.03);
+  --table-hover: rgba(0,132,61,.18);
+  --focus-ring:  rgba(0,132,61,.3);
 }
 body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); background: var(--page-bg); -webkit-font-smoothing: antialiased; }
 .page-wrap { max-width: 1060px; margin: 0 auto; padding: 24px 20px 60px; }
@@ -175,27 +183,33 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
 .edit-actions { display: flex; gap: 10px; margin-top: 16px; }
 
 /* ── DARK MODE OVERRIDES ── */
-@media (prefers-color-scheme: dark) {
-  .STATUS_BG_OFFEN    { background: rgba(255,159,10,.1) !important; }
-  .STATUS_BG_ERLEDIGT { background: rgba(0,132,61,.1) !important; }
-  .STATUS_BG_VERZÖGERT { background: rgba(255,69,58,.08) !important; }
-  .STATUS_BG_ENTFÄLLT  { background: rgba(142,142,147,.1) !important; }
-  .doc-header .brand-name { color: #34C759; }
-  .doc-header .badge { background: #FF453A; }
-  .doc-header .brand img, #pw-overlay img { background: rgba(255,255,255,.85); padding: 2px; border-radius: 10px; }
-  .month-header .month-title { color: #34C759; }
-  .month-header .month-count { background: rgba(52,199,89,.12); color: #34C759; }
-  .archiv-tab.active { background: #34C759; color: #000; border-color: #34C759; }
-  .archiv-tabs { border-bottom-color: #34C759; }
-  .stat-card .stat-value { color: #34C759; }
-  .edit-panel h3 { color: #34C759; }
-  .btn-secondary { background: rgba(52,199,89,.1); color: #34C759; border-color: rgba(52,199,89,.2); }
-  .btn-secondary:hover { background: #34C759; color: #000; }
-  .btn-primary { background: #34C759; box-shadow: 0 2px 8px rgba(52,199,89,.3); }
-  .btn-primary:hover { background: #2DB84E; }
-  .btn-print { background: rgba(255,255,255,.12); }
-  .btn-print:hover { background: rgba(255,255,255,.2); }
-}
+:root[data-theme="dark"] .STATUS_BG_OFFEN    { background: rgba(255,159,10,.18) !important; color: var(--gray-dark) !important; }
+:root[data-theme="dark"] .STATUS_BG_ERLEDIGT { background: rgba(0,132,61,.22) !important; color: var(--gray-dark) !important; }
+:root[data-theme="dark"] .STATUS_BG_VERZÖGERT { background: rgba(255,69,58,.15) !important; color: var(--gray-dark) !important; }
+:root[data-theme="dark"] .STATUS_BG_ENTFÄLLT  { background: rgba(142,142,147,.15) !important; color: #B4B4B9 !important; }
+:root[data-theme="dark"] .doc-header .brand-name { color: #34C759; }
+:root[data-theme="dark"] .doc-header .badge { background: #FF453A; }
+:root[data-theme="dark"] .doc-header .brand img, :root[data-theme="dark"] #pw-overlay img { background: rgba(255,255,255,.85); padding: 2px; border-radius: 10px; }
+:root[data-theme="dark"] .month-header .month-title { color: #34C759; }
+:root[data-theme="dark"] .month-header .month-count { background: rgba(52,199,89,.12); color: #34C759; }
+:root[data-theme="dark"] .archiv-tab.active { background: #34C759; color: #000; border-color: #34C759; }
+:root[data-theme="dark"] .archiv-tabs { border-bottom-color: #34C759; }
+:root[data-theme="dark"] .stat-card .stat-value { color: #34C759; }
+:root[data-theme="dark"] .edit-panel h3 { color: #34C759; }
+:root[data-theme="dark"] .btn-secondary { background: rgba(52,199,89,.1); color: #34C759; border-color: rgba(52,199,89,.2); }
+:root[data-theme="dark"] .btn-secondary:hover { background: #34C759; color: #000; }
+:root[data-theme="dark"] .btn-primary { background: #34C759; color: #000; box-shadow: 0 2px 8px rgba(52,199,89,.3); }
+:root[data-theme="dark"] .btn-primary:hover { background: #2DB84E; }
+:root[data-theme="dark"] .btn-print { background: rgba(255,255,255,.12); }
+:root[data-theme="dark"] .btn-print:hover { background: rgba(255,255,255,.2); }
+:root[data-theme="dark"] input, :root[data-theme="dark"] textarea, :root[data-theme="dark"] select { color: var(--gray-dark); color-scheme: dark; }
+:root[data-theme="dark"] input::placeholder, :root[data-theme="dark"] textarea::placeholder { color: var(--gray-med); opacity: 1; }
+:root[data-theme="dark"] table.arch-table td { color: var(--gray-dark); }
+:root[data-theme="dark"] .theme-toggle .theme-icon-light { display: none; }
+:root[data-theme="dark"] .theme-toggle .theme-icon-dark { display: inline; }
+.theme-toggle { padding: 9px 14px; font-size: 16px; line-height: 1; }
+.theme-toggle .theme-icon-dark { display: none; }
+.theme-toggle .theme-icon-light { display: inline; }
 
 /* ── LOGIN ANIMATION ── */
 @keyframes fadeInUp {
@@ -310,6 +324,9 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <div class="toolbar">
   <a href="index.html" class="btn btn-secondary">← Zurück zum Protokoll</a>
   <button class="btn btn-primary" onclick="printMonth()">🖨 Drucken / PDF</button>
+  <button class="btn btn-secondary theme-toggle" onclick="toggleTheme()" title="Hell / Dunkel umschalten" aria-label="Theme wechseln">
+    <span class="theme-icon-light">☀️</span><span class="theme-icon-dark">🌙</span>
+  </button>
   <span id="status-msg">Lade …</span>
 </div>
 
@@ -347,6 +364,16 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 </div>
 
 <script>
+// ── THEME TOGGLE ──
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('hh-theme', next); } catch(e) {}
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', next === 'dark' ? '#000000' : '#00843D');
+}
+
 // ── SUPABASE ──
 const SUPABASE_URL = 'https://fkbusafoleeayzhfdtuk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrYnVzYWZvbGVlYXl6aGZkdHVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MzMzNTIsImV4cCI6MjA5MDEwOTM1Mn0.st7rTMSUmXVPYLeiRcgJ5FdaVKH2ci3iRecS_w6xHqM';
