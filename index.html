@@ -929,10 +929,20 @@ function updateHeaderPeriod() {
 }
 
 // ── PERSIST (Supabase + localStorage fallback) ───────────────
+// Unique ID per tab/session – used to ignore our own realtime echoes
+const CLIENT_ID = (crypto && crypto.randomUUID ? crypto.randomUUID() : (Math.random().toString(36).slice(2) + Date.now()));
+let _saving = false;
+let _dirtyDuringSave = false;
+
 async function saveData() {
+  if (_saving) { _dirtyDuringSave = true; return; }   // skip overlapping saves
+  _saving = true;
   collectMeta();
   setStatus('Speichern …', 'pending');
   try {
+    // Stamp the payload so we can filter our own echo in realtime
+    state.__clientId = CLIENT_ID;
+    state.__savedAt  = Date.now();
     const { error } = await sb
       .from('protokoll')
       .upsert({ id: 'current', data: state, updated_at: new Date().toISOString() });
@@ -949,6 +959,14 @@ async function saveData() {
     localStorage.setItem('mbr_current', JSON.stringify(state));
     setStatus('Lokal gespeichert (Supabase nicht erreichbar)', 'error');
     console.warn('Supabase-Speichern fehlgeschlagen:', e);
+  } finally {
+    _saving = false;
+    // If new edits came in while we were saving, queue another save
+    if (_dirtyDuringSave) {
+      _dirtyDuringSave = false;
+      clearTimeout(_saveTimer);
+      _saveTimer = setTimeout(() => { _saveTimer = null; collectMeta(); saveData(); }, 1500);
+    }
   }
 }
 async function createBackup() {
@@ -1008,7 +1026,7 @@ let _saveTimer = null;
 function markDirty() {
   setStatus('Nicht gespeichert', 'error');
   clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => { collectMeta(); saveData(); }, 1500);
+  _saveTimer = setTimeout(() => { _saveTimer = null; collectMeta(); saveData(); }, 1500);
 }
 function setStatus(msg, type) {
   const el = document.getElementById('save-status');
@@ -1033,7 +1051,11 @@ function autoResizeAll(container) {
 }
 
 // ── AUTOSAVE every 60s ────────────────────────────────────────
-setInterval(() => { collectMeta(); saveData(); }, 60000);
+setInterval(() => {
+  // Don't autosave if a save is in flight or a debounced save is already queued
+  if (_saving || _saveTimer) return;
+  collectMeta(); saveData();
+}, 60000);
 
 // ── INIT ──────────────────────────────────────────────────────
 function applyLoadedState(loaded) {
@@ -1086,6 +1108,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'protokoll', filter: 'id=eq.current' },
       (payload) => {
         if (payload.new && payload.new.data && Object.keys(payload.new.data).length > 0) {
+          // Ignore our own save echoes – they'd otherwise overwrite edits made
+          // between saveData() being sent and the echo coming back.
+          if (payload.new.data.__clientId === CLIENT_ID) return;
+          // If the user is currently editing locally (save pending), ignore remote
+          // updates – their next save will take the authoritative state.
+          if (_saving || _saveTimer) return;
           applyLoadedState(payload.new.data);
           localStorage.setItem('mbr_current', JSON.stringify(state));
           renderAll();
