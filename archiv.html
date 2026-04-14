@@ -78,11 +78,14 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 
 /* ── HEADER ── */
 .doc-header {
-  background: var(--header-bg); padding: 14px 20px 12px; margin: -24px -20px 0;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 16px 22px;
   backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 2px solid var(--green); margin-bottom: 20px;
-  box-shadow: 0 1px 12px rgba(0,0,0,.04);
+  border-bottom: 3px solid var(--green); margin-bottom: 18px;
+  box-shadow: var(--glass-shadow);
 }
 .doc-header .brand { display: flex; align-items: center; gap: 16px; }
 .doc-header .brand-text { display: flex; flex-direction: column; justify-content: center; }
@@ -227,17 +230,18 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
 .theme-switch .theme-switch-icon { font-size: 12px; line-height: 1; pointer-events: none; z-index: 1; position: relative; transition: opacity .2s; }
 .theme-switch .theme-switch-thumb {
   position: absolute;
-  top: 3px; left: 3px;
+  top: 50%; left: 3px;
   width: 24px; height: 24px;
   background: #fff;
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(0,0,0,.2), 0 0 0 .5px rgba(0,0,0,.04);
+  transform: translateY(-50%);
   transition: transform .28s cubic-bezier(.2,.7,.3,1), background .25s;
   pointer-events: none;
 }
 :root[data-theme="dark"] .theme-switch { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.12); }
 :root[data-theme="dark"] .theme-switch:hover { background: rgba(255,255,255,.18); }
-:root[data-theme="dark"] .theme-switch .theme-switch-thumb { transform: translateX(30px); background: #1C1C1E; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+:root[data-theme="dark"] .theme-switch .theme-switch-thumb { transform: translateY(-50%) translateX(30px); background: #1C1C1E; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
 .theme-switch .sun { opacity: 1; }
 .theme-switch .moon { opacity: .5; }
 :root[data-theme="dark"] .theme-switch .sun { opacity: .5; }
@@ -253,7 +257,7 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
 /* ── MOBILE ── */
 @media (max-width: 640px) {
   .page-wrap { padding: 16px 12px 40px; overflow-x: hidden; }
-  .doc-header { flex-direction: column; gap: 8px; align-items: flex-start; padding: 12px 14px; margin: -16px -12px 0; }
+  .doc-header { flex-direction: column; gap: 8px; align-items: flex-start; padding: 14px 16px; }
   .doc-header .brand-name { font-size: 17px; }
   .doc-header .header-right { width: 100%; justify-content: space-between; }
   .stats-bar { gap: 8px; }
