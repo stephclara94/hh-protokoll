@@ -152,7 +152,15 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
   flex-shrink: 0;
 }
 .theme-switch:hover { background: rgba(0,132,61,.18); }
-.theme-switch .theme-switch-icon { font-size: 12px; line-height: 1; pointer-events: none; z-index: 1; position: relative; transition: opacity .2s; }
+.theme-switch .theme-switch-icon {
+  position: absolute; top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px; line-height: 1;
+  pointer-events: none; z-index: 2;
+  transition: opacity .2s;
+}
+.theme-switch .sun  { left: 15px; }
+.theme-switch .moon { left: 45px; }
 .theme-switch .theme-switch-thumb {
   position: absolute;
   top: 50%; left: 3px;
