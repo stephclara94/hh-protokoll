@@ -94,7 +94,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 
 /* ── TOOLBAR ── */
 .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-.toolbar span { font-size: 13px; color: var(--gray-med); margin-left: auto; }
+.toolbar span { font-size: 13px; color: var(--gray-med); }
 .btn { padding: 9px 20px; border: none; border-radius: 980px; cursor: pointer;
   font-size: 14px; font-weight: 500; font-family: var(--font); letter-spacing: -.01em;
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -205,11 +205,43 @@ table.arch-table td textarea { resize: vertical; min-height: 36px; }
 :root[data-theme="dark"] input, :root[data-theme="dark"] textarea, :root[data-theme="dark"] select { color: var(--gray-dark); color-scheme: dark; }
 :root[data-theme="dark"] input::placeholder, :root[data-theme="dark"] textarea::placeholder { color: var(--gray-med); opacity: 1; }
 :root[data-theme="dark"] table.arch-table td { color: var(--gray-dark); }
-:root[data-theme="dark"] .theme-toggle .theme-icon-light { display: none; }
-:root[data-theme="dark"] .theme-toggle .theme-icon-dark { display: inline; }
-.theme-toggle { padding: 9px 14px; font-size: 16px; line-height: 1; }
-.theme-toggle .theme-icon-dark { display: none; }
-.theme-toggle .theme-icon-light { display: inline; }
+/* iOS-style theme switch */
+.theme-switch {
+  position: relative;
+  width: 62px; height: 32px;
+  border-radius: 980px;
+  background: rgba(0,132,61,.12);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0 7px;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background .25s ease;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.06);
+  flex-shrink: 0;
+}
+.theme-switch:hover { background: rgba(0,132,61,.18); }
+.theme-switch .theme-switch-icon { font-size: 12px; line-height: 1; pointer-events: none; z-index: 1; position: relative; transition: opacity .2s; }
+.theme-switch .theme-switch-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 24px; height: 24px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2), 0 0 0 .5px rgba(0,0,0,.04);
+  transition: transform .28s cubic-bezier(.2,.7,.3,1), background .25s;
+  pointer-events: none;
+}
+:root[data-theme="dark"] .theme-switch { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.12); }
+:root[data-theme="dark"] .theme-switch:hover { background: rgba(255,255,255,.18); }
+:root[data-theme="dark"] .theme-switch .theme-switch-thumb { transform: translateX(30px); background: #1C1C1E; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+.theme-switch .sun { opacity: 1; }
+.theme-switch .moon { opacity: .5; }
+:root[data-theme="dark"] .theme-switch .sun { opacity: .5; }
+:root[data-theme="dark"] .theme-switch .moon { opacity: 1; }
 
 /* ── LOGIN ANIMATION ── */
 @keyframes fadeInUp {
@@ -324,10 +356,12 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 <div class="toolbar">
   <a href="index.html" class="btn btn-secondary">← Zurück zum Protokoll</a>
   <button class="btn btn-primary" onclick="printMonth()">🖨 Drucken / PDF</button>
-  <button class="btn btn-secondary theme-toggle" onclick="toggleTheme()" title="Hell / Dunkel umschalten" aria-label="Theme wechseln">
-    <span class="theme-icon-light">☀️</span><span class="theme-icon-dark">🌙</span>
-  </button>
   <span id="status-msg">Lade …</span>
+  <button class="theme-switch" role="switch" onclick="toggleTheme()" title="Hell / Dunkel umschalten" aria-label="Theme wechseln">
+    <span class="theme-switch-icon sun">☀️</span>
+    <span class="theme-switch-icon moon">🌙</span>
+    <span class="theme-switch-thumb"></span>
+  </button>
 </div>
 
 <!-- STATS -->
