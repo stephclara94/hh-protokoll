@@ -880,10 +880,13 @@ async function newMonth() {
 
   // Keep only open/delayed tasks
   state.tasks       = state.tasks.filter(t => t.status==='OFFEN' || t.status==='IN ARBEIT' || t.status==='VERZÖGERT');
-  state.meta        = {};
+  state.meta        = { 'm-date': new Date().toISOString().slice(0,10), 'm-teilnehmer': 'Stephan Clara, Karl Pfeifer' };
   state.agenda      = [];
   state.beschluesse = [];
-  renderAll(); markDirty();
+  renderAll();
+  updateHeaderPeriod();
+  setDefaultDueDate();
+  markDirty();
   alert('Neuer Monat gestartet. ' + state.tasks.length + ' Aufgabe(n) übernommen.\n' + label + ' wurde ins Archiv verschoben.');
 }
 
