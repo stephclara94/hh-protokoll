@@ -1130,8 +1130,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   renderAll();
   bindMeta();
-  if (!state.meta['m-date']) {
-    document.getElementById('m-date').value = new Date().toISOString().slice(0,10);
+  // Always default the meeting date to today when opening the protocol
+  const todayISO = new Date().toISOString().slice(0,10);
+  const dateEl = document.getElementById('m-date');
+  if (dateEl) {
+    dateEl.value = todayISO;
+    state.meta['m-date'] = todayISO;
     updateHeaderPeriod();
   }
   setDefaultDueDate();
