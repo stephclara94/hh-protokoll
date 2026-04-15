@@ -272,10 +272,16 @@ table.task-table td input:focus { background: var(--table-hover); border-radius:
 table.task-table td.td-status select { width: 100%; font-size: 11px; padding: 3px 6px;
   border-radius: 8px; border: 1px solid var(--input-border); font-family: var(--font); background: var(--input-bg); color: var(--gray-dark);
   white-space: nowrap; text-overflow: clip; }
-table.task-table td.td-status { min-width: 110px; white-space: nowrap; }
-table.task-table td.td-prio select { width: 100%; font-size: 14px; padding: 3px 2px; text-align: center;
-  border-radius: 8px; border: 1px solid var(--input-border); font-family: var(--font); background: var(--input-bg); color: var(--gray-dark); }
-table.task-table td.td-prio { text-align: center; }
+table.task-table td.td-status { min-width: 96px; white-space: nowrap; }
+table.task-table td.td-prio { text-align: center; padding-left: 2px; padding-right: 2px; }
+table.task-table td.td-prio select {
+  width: 38px; max-width: 100%;
+  font-size: 16px; line-height: 1; padding: 4px 0; text-align: center; text-align-last: center;
+  border-radius: 8px; border: 1px solid var(--input-border);
+  font-family: var(--font); background: var(--input-bg); color: var(--gray-dark);
+  -webkit-appearance: none; -moz-appearance: none; appearance: none;
+  background-image: none;
+}
 
 .status-open    { background: #FFF3CD !important; }
 .status-working { background: #DBEAFE !important; }
@@ -636,13 +642,13 @@ if(sessionStorage.getItem('hh-auth')==='1'){
     <table class="task-table">
       <thead><tr>
         <th style="width:4%">#</th>
-        <th style="width:5%">Prio</th>
-        <th style="width:26%">Aufgabe</th>
+        <th style="width:6%">Prio</th>
+        <th style="width:30%">Aufgabe</th>
         <th style="width:13%">Verantwortlich</th>
         <th style="width:10%">Erstellt</th>
         <th style="width:10%">Fällig</th>
         <th style="width:10%">Erledigt</th>
-        <th style="width:19%">Status</th>
+        <th style="width:14%">Status</th>
         <th class="no-print" style="width:3%"></th>
       </tr></thead>
       <tbody id="new-task-body"></tbody>
