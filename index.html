@@ -269,10 +269,13 @@ table.task-table td input[type=text], table.task-table td input[type=date] {
   width: 100%; border: none; background: transparent; font-family: var(--font);
   font-size: 12px; color: var(--gray-dark); outline: none; }
 table.task-table td input:focus { background: var(--table-hover); border-radius: 6px; padding: 2px 4px; }
-table.task-table td.td-status select { width: 100%; font-size: 11px; padding: 3px 4px;
+table.task-table td.td-status select { width: 100%; font-size: 11px; padding: 3px 6px;
+  border-radius: 8px; border: 1px solid var(--input-border); font-family: var(--font); background: var(--input-bg); color: var(--gray-dark);
+  white-space: nowrap; text-overflow: clip; }
+table.task-table td.td-status { min-width: 110px; white-space: nowrap; }
+table.task-table td.td-prio select { width: 100%; font-size: 14px; padding: 3px 2px; text-align: center;
   border-radius: 8px; border: 1px solid var(--input-border); font-family: var(--font); background: var(--input-bg); color: var(--gray-dark); }
-table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 4px;
-  border-radius: 8px; border: 1px solid var(--input-border); font-family: var(--font); background: var(--input-bg); color: var(--gray-dark); }
+table.task-table td.td-prio { text-align: center; }
 
 .status-open    { background: #FFF3CD !important; }
 .status-working { background: #DBEAFE !important; }
@@ -431,8 +434,12 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   table.task-table td:nth-child(7) { white-space: nowrap; width: 1%; }
 
   /* Aufgabe + Verantwortlich: nehmen den Rest */
-  table.task-table td:nth-child(3) { width: 35%; }
-  table.task-table td:nth-child(4) { width: 15%; }
+  table.task-table td:nth-child(3) { width: 32%; }
+  table.task-table td:nth-child(4) { width: 13%; }
+
+  /* Status: Platz für "VERZÖGERT" */
+  table.task-table td:nth-child(8) { min-width: 60pt; white-space: nowrap; }
+  .td-status select { min-width: 60pt; }
 
   /* Agenda: Nr klein, Thema+Entscheidung teilen sich den Rest, Verantwortlich kompakt */
   table.kpi-table td:nth-child(1) { white-space: nowrap; width: 1%; }
@@ -446,11 +453,23 @@ table.task-table td.td-prio select { width: 100%; font-size: 11px; padding: 3px 
   table.task-table td input[type=date] {
     width: 100%; font-size: 8pt; background: transparent;
     border: none; white-space: normal; word-break: break-word;
+    text-overflow: clip; overflow: visible;
+  }
+  /* Textareas in tables: show full content on print */
+  table.kpi-table td textarea,
+  table.task-table td textarea {
+    width: 100%; font-size: 8pt; background: transparent;
+    border: none; resize: none; overflow: visible !important;
+    white-space: pre-wrap; word-break: break-word;
+    height: auto !important; min-height: 0;
   }
   .td-status select, .td-prio select {
-    font-size: 7.5pt; border: none; background: transparent;
-    white-space: nowrap;
+    font-size: 8pt; border: none; background: transparent;
+    white-space: nowrap; -webkit-appearance: none; appearance: none;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    padding: 0; text-align: left;
   }
+  .td-prio select { font-size: 10pt; text-align: center; }
 
   table.task-table tr, table.kpi-table tr { page-break-inside: avoid; }
 
@@ -617,13 +636,13 @@ if(sessionStorage.getItem('hh-auth')==='1'){
     <table class="task-table">
       <thead><tr>
         <th style="width:4%">#</th>
-        <th style="width:8%">Prio</th>
-        <th style="width:28%">Aufgabe</th>
-        <th style="width:15%">Verantwortlich</th>
-        <th style="width:11%">Erstellt</th>
-        <th style="width:11%">Fällig</th>
-        <th style="width:11%">Erledigt</th>
-        <th style="width:9%">Status</th>
+        <th style="width:5%">Prio</th>
+        <th style="width:26%">Aufgabe</th>
+        <th style="width:13%">Verantwortlich</th>
+        <th style="width:10%">Erstellt</th>
+        <th style="width:10%">Fällig</th>
+        <th style="width:10%">Erledigt</th>
+        <th style="width:19%">Status</th>
         <th class="no-print" style="width:3%"></th>
       </tr></thead>
       <tbody id="new-task-body"></tbody>
@@ -791,8 +810,8 @@ function renderTasks() {
     tr.innerHTML = `
       <td style="text-align:center;font-weight:700;color:var(--green)">${i+1}</td>
       <td class="td-prio">
-        <select onchange="updateTask(${i},'prio',this.value)">
-          ${['Hoch','Mittel','Niedrig'].map(p=>`<option value="${p}" ${t.prio===p?'selected':''}>${PRIO_ICONS[p]} ${p}</option>`).join('')}
+        <select onchange="updateTask(${i},'prio',this.value)" title="Priorität">
+          ${['Hoch','Mittel','Niedrig'].map(p=>`<option value="${p}" ${t.prio===p?'selected':''} title="${p}">${PRIO_ICONS[p]}</option>`).join('')}
         </select>
       </td>
       <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:12px;resize:none;min-height:20px;overflow:hidden;"
@@ -852,8 +871,17 @@ function printPDF() {
   const d = String(today.getDate()).padStart(2, '0');
   const origTitle = document.title;
   document.title = `${y}-${m}-${d} weekly Management JF`;
+  // Expand all textareas to their full content height so nothing is clipped on print
+  document.querySelectorAll('textarea').forEach(ta => {
+    ta.dataset._h = ta.style.height;
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+  });
   window.print();
   document.title = origTitle;
+  document.querySelectorAll('textarea').forEach(ta => {
+    if (ta.dataset._h !== undefined) { ta.style.height = ta.dataset._h; delete ta.dataset._h; }
+  });
 }
 
 // ── NEW MONTH ─────────────────────────────────────────────────
@@ -923,12 +951,11 @@ function applyMeta() {
 
 // ── HEADER PERIOD ─────────────────────────────────────────────
 function updateHeaderPeriod() {
-  const dateEl = document.getElementById('m-date');
   const el = document.getElementById('header-period');
-  if (el && dateEl && dateEl.value) {
-    const d = new Date(dateEl.value);
-    el.textContent = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-  }
+  if (!el) return;
+  // Always show the month the protocol is being opened (today), not the saved meeting date
+  const d = new Date();
+  el.textContent = d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
 }
 
 // ── PERSIST (Supabase + localStorage fallback) ───────────────
