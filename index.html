@@ -177,6 +177,28 @@ tr.comment-row .comment-add { display: flex; gap: 6px; }
 tr.comment-row .comment-add input { flex: 1; padding: 6px 10px; border: 1px solid var(--input-border);
   border-radius: 8px; font-family: var(--font); font-size: 12px; background: var(--input-bg); color: var(--gray-dark); }
 tr.comment-row .comment-add button { padding: 6px 12px; font-size: 12px; }
+/* Audit log */
+.audit-list { display: flex; flex-direction: column; gap: 4px; max-height: 360px; overflow-y: auto; }
+.audit-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 10px; font-size: 12px;
+  background: var(--input-bg); border-radius: 8px; flex-wrap: wrap; }
+.audit-item .audit-ts { color: var(--gray-med); font-family: monospace; font-size: 11px; min-width: 130px; }
+.audit-item .audit-client { font-family: monospace; font-size: 10px; color: var(--gray-med); background: var(--green-light);
+  padding: 1px 6px; border-radius: 4px; }
+.audit-item .audit-action { font-weight: 600; color: var(--green); }
+.audit-item .audit-detail { color: var(--gray-dark); flex: 1; }
+:root[data-theme="dark"] .audit-item .audit-action { color: #34C759; }
+/* Conflict dialog */
+.conflict-overlay { position: fixed; inset: 0; z-index: 99998; background: rgba(0,0,0,.5);
+  display: none; align-items: center; justify-content: center; padding: 20px; }
+.conflict-overlay.open { display: flex; }
+.conflict-dialog { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 18px;
+  padding: 24px 28px; max-width: 560px; width: 100%; box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+.conflict-dialog h3 { color: var(--amber); margin-bottom: 8px; font-size: 16px; }
+.conflict-dialog p { font-size: 13px; color: var(--gray-dark); margin-bottom: 14px; line-height: 1.5; }
+.conflict-dialog .conflict-summary { font-size: 12px; color: var(--gray-med); background: var(--input-bg);
+  padding: 10px 12px; border-radius: 10px; margin-bottom: 16px; }
+.conflict-dialog .conflict-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 /* Drag & Drop */
 .drag-handle { cursor: grab; user-select: none; opacity: .5; transition: opacity .15s; padding: 2px 4px; }
 .drag-handle:hover { opacity: 1; }
@@ -671,6 +693,9 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   <a href="archiv.html" class="btn btn-secondary" style="text-decoration:none;">🗂 Archiv</a>
   <button class="btn btn-print" onclick="printPDF()">🖨 Drucken / PDF</button>
   <button class="btn btn-danger" onclick="clearAll()" title="Alle Daten löschen">🗑 Reset</button>
+  <button class="btn btn-secondary" onclick="exportJSON()" title="Backup als JSON herunterladen">⬇ Export</button>
+  <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()" title="Backup wiederherstellen">⬆ Import</button>
+  <input type="file" id="import-file" accept="application/json" style="display:none;" onchange="importJSON(this)">
   <input type="search" id="global-search" class="global-search no-print" placeholder="🔍  Suchen (Cmd+F) …" oninput="runSearch(this.value)" autocomplete="off">
   <button class="theme-switch" role="switch" onclick="toggleTheme()" title="Hell / Dunkel umschalten" aria-label="Theme wechseln">
     <span class="theme-switch-icon sun">☀️</span>
@@ -679,6 +704,20 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   </button>
 </div>
 <div id="search-results" class="search-results no-print" style="display:none;"></div>
+
+<!-- CONFLICT DIALOG -->
+<div id="conflict-overlay" class="conflict-overlay" role="alertdialog" aria-modal="true" aria-labelledby="conflict-title">
+  <div class="conflict-dialog">
+    <h3 id="conflict-title">⚠ Konflikt erkannt</h3>
+    <p>Auf einem anderen Gerät wurde dieses Protokoll geändert, während du selbst Änderungen vorgenommen hast. Wie möchtest du vorgehen?</p>
+    <div class="conflict-summary" id="conflict-summary"></div>
+    <div class="conflict-actions">
+      <button class="btn btn-secondary" onclick="resolveConflict('keep')">Meine Änderungen behalten</button>
+      <button class="btn btn-secondary" onclick="resolveConflict('remote')">Server-Stand übernehmen</button>
+      <button class="btn btn-primary" onclick="resolveConflict('merge')">Beide zusammenführen</button>
+    </div>
+  </div>
+</div>
 
 <!-- MINI DASHBOARD -->
 <div id="dashboard" class="dashboard no-print"></div>
@@ -826,7 +865,16 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   </div>
 </div>
 
+<!-- AUDIT LOG (collapsible) -->
+<div class="section no-print" id="sec-audit" style="display:none;">
+  <div class="section-title"><span class="section-num">📜</span>Änderungs-Log</div>
+  <p style="font-size:13px;color:var(--gray-med);margin-bottom:10px;">Letzte Aktionen (lokal & Multi-Device).</p>
+  <div id="audit-list" class="audit-list"></div>
+</div>
+
 <div class="no-print" style="text-align:center;padding:16px 0 8px;">
+  <a href="#" onclick="event.preventDefault();toggleAuditLog();" style="color:var(--gray-med);font-size:12px;text-decoration:none;">📜 Änderungs-Log anzeigen / verbergen</a>
+  <br>
   <span id="save-status"><span class="status-dot pending"></span>Nicht gespeichert</span>
 </div>
 
@@ -886,6 +934,7 @@ function renderAgenda() {
 function addAgendaItem() {
   const thema = document.getElementById('ag-thema').value.trim();
   if (!thema) { alert('Bitte ein Thema eingeben.'); return; }
+  audit('Agenda-Punkt erstellt', thema.slice(0,80));
   state.agenda.push({
     thema,
     ent: document.getElementById('ag-ent').value.trim(),
@@ -899,6 +948,7 @@ function addAgendaItem() {
 
 function delAgendaItem(i) {
   if (confirm('Agenda-Punkt löschen?')) {
+    audit('Agenda-Punkt gelöscht', (state.agenda[i].thema||'').slice(0,80));
     state.agenda.splice(i, 1);
     renderAgenda(); markDirty();
   }
@@ -931,11 +981,15 @@ function renderBeschluesse() {
   }
 }
 function addBeschluss() {
+  audit('Beschluss erstellt');
   state.beschluesse.push({ header:'', text:'', abstimmung:'Einstimmig' });
   renderBeschluesse(); markDirty();
 }
 function delBeschluss(i) {
-  if (confirm('Beschluss löschen?')) { state.beschluesse.splice(i,1); renderBeschluesse(); markDirty(); }
+  if (confirm('Beschluss löschen?')) {
+    audit('Beschluss gelöscht', (state.beschluesse[i].header||state.beschluesse[i].text||'').slice(0,80));
+    state.beschluesse.splice(i,1); renderBeschluesse(); markDirty();
+  }
 }
 
 // ── UNIFIED TASK TRACKER ──────────────────────────────────────
@@ -1077,16 +1131,18 @@ function delComment(i, ci) {
   markDirty();
 }
 function updateTaskStatus(i, val) {
+  audit('Status geändert', (state.tasks[i].desc||'').slice(0,60) + ' → ' + val);
   state.tasks[i].status = val;
   if (val==='ERLEDIGT' && !state.tasks[i].done) state.tasks[i].done = new Date().toISOString().slice(0,10);
   renderTasks(); markDirty();
 }
 function delTask(i) {
-  if (confirm('Aufgabe löschen?')) { state.tasks.splice(i,1); renderTasks(); markDirty(); }
+  if (confirm('Aufgabe löschen?')) { audit('Aufgabe gelöscht', (state.tasks[i].desc||'').slice(0,80)); state.tasks.splice(i,1); renderTasks(); markDirty(); }
 }
 function addTask() {
   const desc = document.getElementById('nt-desc').value.trim();
   if (!desc) { alert('Bitte Aufgabenbeschreibung eingeben.'); return; }
+  audit('Aufgabe erstellt', desc.slice(0, 80));
   state.tasks.push({
     desc,
     person:  document.getElementById('nt-person').value.trim(),
@@ -1433,8 +1489,184 @@ async function clearAll() {
 }
 let _saveTimer = null;
 let _hasUnsavedChanges = false;
+
+// ── AUDIT LOG ────────────────────────────────────────────────
+const AUDIT_LIMIT = 200;
+function audit(action, detail) {
+  state.audit = state.audit || [];
+  state.audit.unshift({
+    ts: new Date().toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }),
+    client: CLIENT_ID.slice(0,8),
+    action,
+    detail: detail || ''
+  });
+  if (state.audit.length > AUDIT_LIMIT) state.audit.length = AUDIT_LIMIT;
+}
+function renderAuditLog() {
+  const el = document.getElementById('audit-list');
+  if (!el) return;
+  const log = state.audit || [];
+  if (!log.length) { el.innerHTML = '<p style="color:var(--gray-med);font-size:13px;">Noch keine Änderungen protokolliert.</p>'; return; }
+  el.innerHTML = log.slice(0, 30).map(e => `
+    <div class="audit-item">
+      <span class="audit-ts">${escH(e.ts)}</span>
+      <span class="audit-client" title="Client-ID">${escH(e.client)}</span>
+      <span class="audit-action">${escH(e.action)}</span>
+      ${e.detail ? `<span class="audit-detail">${escH(e.detail)}</span>` : ''}
+    </div>`).join('');
+}
+function toggleAuditLog() {
+  const sec = document.getElementById('sec-audit');
+  if (!sec) return;
+  sec.style.display = sec.style.display === 'none' ? '' : 'none';
+  if (sec.style.display !== 'none') renderAuditLog();
+}
+
+// ── CONFLICT RESOLUTION ──────────────────────────────────────
+let _pendingConflict = null;
+function showConflictDialog(remote) {
+  _pendingConflict = remote;
+  const sum = [];
+  sum.push(`Server: ${(remote.tasks||[]).length} Aufgaben, ${(remote.agenda||[]).length} Agenda-Punkte, ${(remote.beschluesse||[]).length} Beschlüsse`);
+  sum.push(`Lokal:  ${state.tasks.length} Aufgaben, ${state.agenda.length} Agenda-Punkte, ${state.beschluesse.length} Beschlüsse`);
+  document.getElementById('conflict-summary').textContent = sum.join('\n');
+  document.getElementById('conflict-overlay').classList.add('open');
+}
+function resolveConflict(choice) {
+  const remote = _pendingConflict;
+  document.getElementById('conflict-overlay').classList.remove('open');
+  _pendingConflict = null;
+  if (!remote) return;
+  if (choice === 'keep') {
+    // Force-save local state, overwriting server
+    clearTimeout(_saveTimer); _saveTimer = null;
+    saveData();
+    setStatus('Lokale Änderungen behalten', 'ok');
+  } else if (choice === 'remote') {
+    applyLoadedState(remote);
+    renderAll();
+    _hasUnsavedChanges = false;
+    pushUndoSnapshot(true);
+    setStatus('Server-Stand übernommen', 'ok');
+  } else if (choice === 'merge') {
+    // Simple merge: prefer remote for items NOT modified locally (= present remotely),
+    // append local-only items at end. Same logic for agenda, beschluesse, tasks.
+    function mergeArr(localArr, remoteArr, keyFn) {
+      const remoteKeys = new Set((remoteArr||[]).map(keyFn));
+      const localOnly = (localArr||[]).filter(x => !remoteKeys.has(keyFn(x)));
+      return [...(remoteArr||[]), ...localOnly];
+    }
+    const merged = {
+      meta:        Object.assign({}, state.meta, remote.meta || {}),
+      agenda:      mergeArr(state.agenda, remote.agenda, x => (x.thema||'').trim().toLowerCase()),
+      beschluesse: mergeArr(state.beschluesse, remote.beschluesse, x => (x.header||x.text||'').trim().toLowerCase()),
+      tasks:       mergeArr(state.tasks, remote.tasks, x => (x.desc||'').trim().toLowerCase() + '|' + (x.created||'')),
+      archiv:      remote.archiv || state.archiv,
+    };
+    Object.keys(state).forEach(k => { if (k !== '_openComments') delete state[k]; });
+    Object.assign(state, merged);
+    renderAll();
+    pushUndoSnapshot(true);
+    markDirty();
+    setStatus('Zusammengeführt – bitte prüfen', 'ok');
+  }
+}
+// ── EXPORT / IMPORT ───────────────────────────────────────────
+function exportJSON() {
+  collectMeta();
+  const { _openComments, __clientId, __savedAt, ...clean } = state;
+  const payload = {
+    _meta: { exportedAt: new Date().toISOString(), version: 1, app: 'hh-protokoll' },
+    state: clean,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const now = new Date();
+  const stamp = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  a.href = url;
+  a.download = 'hh-protokoll-backup_' + stamp + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  setStatus('Backup exportiert', 'ok');
+}
+function importJSON(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      const loaded = parsed.state || parsed; // accept raw state too
+      if (!loaded || typeof loaded !== 'object') throw new Error('Ungültiges Format');
+      if (!confirm('Import überschreibt den aktuellen Zustand. Fortfahren?\n\n(Der aktuelle Zustand wird als Backup in Supabase gesichert.)')) { input.value = ''; return; }
+      // Snapshot current state before overwrite
+      createBackup().finally(() => {
+        Object.keys(state).forEach(k => { if (k !== '_openComments') delete state[k]; });
+        Object.assign(state, loaded);
+        pushUndoSnapshot(true);
+        renderAll();
+        markDirty();
+        setStatus('Import erfolgreich – ' + file.name, 'ok');
+      });
+    } catch(err) {
+      alert('Import fehlgeschlagen: ' + err.message);
+    } finally {
+      input.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+// ── UNDO/REDO ────────────────────────────────────────────────
+const _undoStack = [];
+const _redoStack = [];
+const UNDO_LIMIT = 50;
+let _undoSnapshotTimer = null;
+let _isUndoRedo = false;
+function _snapshot() {
+  const { _openComments, __clientId, __savedAt, ...persistable } = state;
+  return JSON.stringify(persistable);
+}
+function pushUndoSnapshot(immediate) {
+  if (_isUndoRedo) return;
+  clearTimeout(_undoSnapshotTimer);
+  const doIt = () => {
+    const snap = _snapshot();
+    if (_undoStack[_undoStack.length - 1] === snap) return;
+    _undoStack.push(snap);
+    if (_undoStack.length > UNDO_LIMIT) _undoStack.shift();
+    _redoStack.length = 0; // clear redo on fresh edit
+  };
+  if (immediate) doIt(); else _undoSnapshotTimer = setTimeout(doIt, 800);
+}
+function applySnapshot(snap) {
+  if (!snap) return;
+  const obj = JSON.parse(snap);
+  Object.keys(state).forEach(k => { if (k !== '_openComments') delete state[k]; });
+  Object.assign(state, obj);
+  _isUndoRedo = true;
+  renderAll();
+  _isUndoRedo = false;
+  markDirty();
+}
+function undo() {
+  if (_undoStack.length < 2) { setStatus('Nichts rückgängig zu machen', 'pending'); return; }
+  const cur = _undoStack.pop();
+  _redoStack.push(cur);
+  applySnapshot(_undoStack[_undoStack.length - 1]);
+  setStatus('Rückgängig (' + _undoStack.length + ' Schritte verbleiben)', 'ok');
+}
+function redo() {
+  if (!_redoStack.length) { setStatus('Nichts wiederherzustellen', 'pending'); return; }
+  const next = _redoStack.pop();
+  _undoStack.push(next);
+  applySnapshot(next);
+  setStatus('Wiederhergestellt', 'ok');
+}
+
 function markDirty() {
   _hasUnsavedChanges = true;
+  pushUndoSnapshot();
   setStatus('Nicht gespeichert', 'error');
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => { _saveTimer = null; collectMeta(); saveData(); }, 1500);
@@ -1467,10 +1699,20 @@ window.addEventListener('keydown', (e) => {
     const el = document.getElementById('nt-desc');
     if (el) { el.focus(); el.scrollIntoView({behavior:'smooth', block:'center'}); }
   }
-  // Cmd/Ctrl+F → open search bar (Phase 2 will handle)
+  // Cmd/Ctrl+F → open search bar
   else if (e.key === 'f' || e.key === 'F') {
     const sb = document.getElementById('global-search');
     if (sb) { e.preventDefault(); sb.focus(); sb.select(); }
+  }
+  // Cmd/Ctrl+Z → undo, Cmd/Ctrl+Shift+Z → redo
+  else if (e.key === 'z' || e.key === 'Z') {
+    e.preventDefault();
+    if (e.shiftKey) redo(); else undo();
+  }
+  // Cmd/Ctrl+Y → redo (Windows convention)
+  else if (e.key === 'y' || e.key === 'Y') {
+    e.preventDefault();
+    redo();
   }
 });
 function setStatus(msg, type) {
@@ -1558,6 +1800,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setDefaultDueDate();
   const tnEl = document.getElementById('m-teilnehmer');
   if (tnEl && !state.meta['m-teilnehmer']) { tnEl.value = 'Stephan Clara, Karl Pfeifer'; state.meta['m-teilnehmer'] = 'Stephan Clara, Karl Pfeifer'; }
+  pushUndoSnapshot(true);  // baseline snapshot for undo
   setStatus(loadedFromServer ? 'Von Supabase geladen' : 'Bereit', 'ok');
 
   // ── Echtzeit-Subscription: Änderungen von anderen Tabs/Geräten ──
@@ -1565,12 +1808,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'protokoll', filter: 'id=eq.current' },
       (payload) => {
         if (payload.new && payload.new.data && Object.keys(payload.new.data).length > 0) {
-          // Ignore our own save echoes – they'd otherwise overwrite edits made
-          // between saveData() being sent and the echo coming back.
+          // Ignore our own save echoes
           if (payload.new.data.__clientId === CLIENT_ID) return;
-          // If the user is currently editing locally (save pending), ignore remote
-          // updates – their next save will take the authoritative state.
-          if (_saving || _saveTimer) return;
+          // If we have unsaved local changes – ask the user how to resolve
+          if (_hasUnsavedChanges || _saveTimer || _saving) {
+            showConflictDialog(payload.new.data);
+            return;
+          }
           applyLoadedState(payload.new.data);
           localStorage.setItem('mbr_current', JSON.stringify(state));
           renderAll();
