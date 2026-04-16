@@ -158,6 +158,32 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
   flex-shrink: 0;
 }
 .theme-switch:hover { background: rgba(0,132,61,.18); }
+/* Task comments */
+.comment-btn { background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 6px;
+  font-size: 13px; color: var(--gray-med); transition: all .15s; position: relative; }
+.comment-btn:hover { background: var(--green); color: #fff; }
+.comment-btn .comment-badge { position: absolute; top: -4px; right: -4px; background: var(--green); color: #fff;
+  font-size: 9px; padding: 1px 4px; border-radius: 8px; font-weight: 700; min-width: 12px; }
+tr.comment-row td { padding: 0 !important; background: var(--table-even) !important; }
+tr.comment-row .comment-box { padding: 10px 16px; }
+tr.comment-row .comment-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+tr.comment-row .comment-item { display: flex; gap: 8px; padding: 6px 10px; background: var(--input-bg);
+  border-radius: 8px; font-size: 12px; }
+tr.comment-row .comment-item .comment-meta { color: var(--gray-med); font-size: 10px; flex-shrink: 0; min-width: 90px; }
+tr.comment-row .comment-item .comment-text { flex: 1; }
+tr.comment-row .comment-item .comment-del { background: none; border: none; color: var(--gray-med); cursor: pointer; padding: 0 4px; opacity: .5; }
+tr.comment-row .comment-item .comment-del:hover { opacity: 1; color: var(--red); }
+tr.comment-row .comment-add { display: flex; gap: 6px; }
+tr.comment-row .comment-add input { flex: 1; padding: 6px 10px; border: 1px solid var(--input-border);
+  border-radius: 8px; font-family: var(--font); font-size: 12px; background: var(--input-bg); color: var(--gray-dark); }
+tr.comment-row .comment-add button { padding: 6px 12px; font-size: 12px; }
+/* Drag & Drop */
+.drag-handle { cursor: grab; user-select: none; opacity: .5; transition: opacity .15s; padding: 2px 4px; }
+.drag-handle:hover { opacity: 1; }
+tr.dragging { opacity: .4; }
+tr.drag-over-top td { box-shadow: inset 0 2px 0 var(--green); }
+tr.drag-over-bottom td { box-shadow: inset 0 -2px 0 var(--green); }
+.beschluss-item .drag-handle { display: inline-block; align-self: center; }
 /* Global Search */
 .global-search {
   flex: 0 1 240px; min-width: 0;
@@ -836,8 +862,9 @@ function renderAgenda() {
   tbody.innerHTML = '';
   state.agenda.forEach((item, i) => {
     const tr = document.createElement('tr');
+    tr.dataset.origIdx = i;
     tr.innerHTML = `
-      <td style="text-align:center;font-weight:700;color:var(--green);width:4%">${i+1}</td>
+      <td style="text-align:center;font-weight:700;color:var(--green);width:4%"><span class="drag-handle no-print" title="Ziehen zum Sortieren">⋮⋮</span> ${i+1}</td>
       <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:none;min-height:22px;overflow:hidden;"
           oninput="state.agenda[${i}].thema=this.value;markDirty();this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Thema …">${escH(item.thema)}</textarea></td>
       <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:none;min-height:22px;overflow:hidden;"
@@ -847,6 +874,7 @@ function renderAgenda() {
       <td class="no-print" style="text-align:center">
         <button onclick="delAgendaItem(${i})" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:14px;">✕</button>
       </td>`;
+    makeRowDraggable(tr, 'agenda', renderAgenda);
     tbody.appendChild(tr);
   });
   if (state.agenda.length === 0) {
@@ -962,8 +990,11 @@ function renderTasks() {
     // Show display index in the # column instead of original position
     const _i = i; // for clarity in template literals below
     tr.dataset.origIdx = i;
+    const noFilter = !document.getElementById('filter-status')?.value
+                  && !document.getElementById('filter-person')?.value
+                  && !document.getElementById('sort-tasks')?.value;
     tr.innerHTML = `
-      <td style="text-align:center;font-weight:700;color:var(--green)">${displayIdx+1}</td>
+      <td style="text-align:center;font-weight:700;color:var(--green)">${noFilter ? `<span class="drag-handle no-print" title="Ziehen zum Sortieren">⋮⋮</span> ` : ''}${displayIdx+1}</td>
       <td class="td-prio">
         <select onchange="updateTask(${i},'prio',this.value)" title="Priorität">
           ${['Hoch','Mittel','Niedrig'].map(p=>`<option value="${p}" ${t.prio===p?'selected':''} title="${p}">${PRIO_ICONS[p]}</option>`).join('')}
@@ -980,8 +1011,31 @@ function renderTasks() {
           ${['ENTFÄLLT','OFFEN','IN ARBEIT','VERZÖGERT','ERLEDIGT'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
-      <td class="td-actions no-print"><button onclick="delTask(${i})" title="Löschen">✕</button></td>`;
+      <td class="td-actions no-print">
+        <button class="comment-btn" onclick="toggleComments(${i})" title="Kommentare / Notizen">💬${(t.comments && t.comments.length) ? `<span class="comment-badge">${t.comments.length}</span>` : ''}</button>
+        <button onclick="delTask(${i})" title="Löschen">✕</button>
+      </td>`;
+    if (noFilter) makeRowDraggable(tr, 'tasks', renderTasks);
     body.appendChild(tr);
+    // Comments expander row
+    if (state._openComments && state._openComments[i]) {
+      const cr = document.createElement('tr');
+      cr.className = 'comment-row no-print';
+      const items = (t.comments || []).map((c, ci) => `
+        <div class="comment-item">
+          <span class="comment-meta">${escH(c.ts || '')}${c.author ? ' · ' + escH(c.author) : ''}</span>
+          <span class="comment-text">${escH(c.text)}</span>
+          <button class="comment-del" onclick="delComment(${i},${ci})" title="Kommentar löschen">✕</button>
+        </div>`).join('');
+      cr.innerHTML = `<td colspan="9"><div class="comment-box">
+        <div class="comment-list">${items || '<span style="color:var(--gray-med);font-size:12px;">Noch keine Kommentare.</span>'}</div>
+        <div class="comment-add">
+          <input type="text" id="cmt-input-${i}" placeholder="Kommentar / Notiz hinzufügen …" onkeydown="if(event.key==='Enter'){addComment(${i});}">
+          <button class="btn btn-secondary btn-sm" onclick="addComment(${i})">Hinzufügen</button>
+        </div>
+      </div></td>`;
+      body.appendChild(cr);
+    }
   });
   if (state.tasks.length === 0) {
     body.innerHTML = '<tr><td colspan="9" style="color:var(--gray-med);font-size:14px;padding:10px 8px;">Keine Aufgaben erfasst.</td></tr>';
@@ -992,6 +1046,35 @@ function renderTasks() {
 }
 function updateTask(i, field, val) {
   state.tasks[i][field] = val; markDirty();
+}
+function toggleComments(i) {
+  state._openComments = state._openComments || {};
+  state._openComments[i] = !state._openComments[i];
+  renderTasks();
+  if (state._openComments[i]) {
+    setTimeout(() => document.getElementById('cmt-input-' + i)?.focus(), 50);
+  }
+}
+function addComment(i) {
+  const inp = document.getElementById('cmt-input-' + i);
+  if (!inp) return;
+  const text = inp.value.trim();
+  if (!text) return;
+  state.tasks[i].comments = state.tasks[i].comments || [];
+  state.tasks[i].comments.push({
+    ts: new Date().toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }),
+    text,
+  });
+  inp.value = '';
+  renderTasks();
+  markDirty();
+  setTimeout(() => document.getElementById('cmt-input-' + i)?.focus(), 50);
+}
+function delComment(i, ci) {
+  if (!confirm('Kommentar löschen?')) return;
+  state.tasks[i].comments.splice(ci, 1);
+  renderTasks();
+  markDirty();
 }
 function updateTaskStatus(i, val) {
   state.tasks[i].status = val;
@@ -1100,6 +1183,48 @@ function setQuickDue(daysFromToday) {
   const d = new Date();
   d.setDate(d.getDate() + daysFromToday);
   dueEl.value = d.toISOString().slice(0, 10);
+}
+// ── DRAG & DROP for sortable rows / items ─────────────────────
+function makeRowDraggable(tr, listKey, rerenderFn) {
+  tr.draggable = true;
+  tr.addEventListener('dragstart', (e) => {
+    tr.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(tr.dataset.origIdx));
+    e.dataTransfer.setData('list/key', listKey);
+  });
+  tr.addEventListener('dragend', () => {
+    tr.classList.remove('dragging');
+    tr.parentElement?.querySelectorAll('tr.drag-over-top, tr.drag-over-bottom').forEach(el => el.classList.remove('drag-over-top','drag-over-bottom'));
+  });
+  tr.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = tr.getBoundingClientRect();
+    const before = (e.clientY - rect.top) < rect.height / 2;
+    tr.classList.toggle('drag-over-top', before);
+    tr.classList.toggle('drag-over-bottom', !before);
+  });
+  tr.addEventListener('dragleave', () => {
+    tr.classList.remove('drag-over-top', 'drag-over-bottom');
+  });
+  tr.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    const fromList = e.dataTransfer.getData('list/key');
+    if (fromList !== listKey || isNaN(fromIdx)) return;
+    const toIdx = parseInt(tr.dataset.origIdx, 10);
+    if (fromIdx === toIdx) return;
+    const rect = tr.getBoundingClientRect();
+    const before = (e.clientY - rect.top) < rect.height / 2;
+    let target = before ? toIdx : toIdx + 1;
+    if (fromIdx < target) target--;
+    const arr = state[listKey];
+    const [moved] = arr.splice(fromIdx, 1);
+    arr.splice(target, 0, moved);
+    rerenderFn();
+    markDirty();
+  });
 }
 // ── SEARCH ────────────────────────────────────────────────────
 function _hl(text, q) {
@@ -1224,9 +1349,11 @@ async function saveData() {
     // Stamp the payload so we can filter our own echo in realtime
     state.__clientId = CLIENT_ID;
     state.__savedAt  = Date.now();
+    // Strip transient UI state before persisting
+    const { _openComments, ...persistable } = state;
     const { error } = await sb
       .from('protokoll')
-      .upsert({ id: 'current', data: state, updated_at: new Date().toISOString() });
+      .upsert({ id: 'current', data: persistable, updated_at: new Date().toISOString() });
     if (error) throw error;
     localStorage.setItem('mbr_current', JSON.stringify(state));
     _hasUnsavedChanges = false;
