@@ -115,9 +115,15 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
   padding: 12px 0; border-bottom: 1px solid var(--border); }
 .toolbar span { font-size: 13px; color: var(--gray-med); margin-left: auto; }
 .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-.status-dot.connected { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.status-dot.connected { background: var(--green); box-shadow: 0 0 4px var(--green); animation: dotPulseOk .6s ease-out; }
 .status-dot.error { background: var(--red); }
-.status-dot.pending { background: var(--amber); }
+.status-dot.pending { background: var(--amber); animation: dotPulse 1.2s ease-in-out infinite; }
+@keyframes dotPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(1.3); } }
+@keyframes dotPulseOk { 0% { transform: scale(2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+#save-status { transition: color .2s; }
+#save-status.saved { color: var(--green); }
+#save-status .check { display: inline-block; opacity: 0; transition: opacity .3s; margin-left: 4px; color: var(--green); font-weight: 700; }
+#save-status.saved .check { opacity: 1; }
 .btn { padding: 9px 20px; border: none; border-radius: 980px; cursor: pointer;
   font-size: 14px; font-weight: 500; font-family: var(--font); letter-spacing: -.01em;
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -152,6 +158,25 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
   flex-shrink: 0;
 }
 .theme-switch:hover { background: rgba(0,132,61,.18); }
+/* Mini Dashboard */
+.dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.dash-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px;
+  padding: 12px 16px; backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow); display: flex; flex-direction: column; gap: 2px; cursor: default; }
+.dash-card .dash-value { font-size: 22px; font-weight: 700; color: var(--green); line-height: 1.1; }
+.dash-card .dash-label { font-size: 11px; color: var(--gray-med); }
+.dash-card.dash-overdue .dash-value { color: var(--red); }
+.dash-card.dash-carry   .dash-value { color: var(--amber); }
+:root[data-theme="dark"] .dash-card .dash-value { color: #34C759; }
+:root[data-theme="dark"] .dash-card.dash-overdue .dash-value { color: #FF6B61; }
+:root[data-theme="dark"] .dash-card.dash-carry   .dash-value { color: #FF9F0A; }
+/* Date quick buttons */
+.date-quick-wrap { display: flex; flex-direction: column; gap: 3px; }
+.date-quick { display: flex; gap: 4px; }
+.date-quick button { padding: 2px 8px; font-size: 10px; border-radius: 980px; border: 1px solid var(--border);
+  background: var(--input-bg); color: var(--gray-med); cursor: pointer; font-family: var(--font);
+  transition: all .15s; }
+.date-quick button:hover { background: var(--green); color: #fff; border-color: var(--green); }
 .theme-switch .theme-switch-icon {
   position: absolute; top: 50%;
   transform: translate(-50%, -50%);
@@ -207,7 +232,7 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
 .table-rounded { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
 table.kpi-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 table.kpi-table th { background: var(--table-header-bg); color: #fff; padding: 8px 10px; text-align: left;
-  font-weight: 600; font-size: 13px; }
+  font-weight: 600; font-size: 13px; position: sticky; top: 56px; z-index: 5; }
 table.kpi-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); transition: background .15s; }
 table.kpi-table td:nth-child(2), table.kpi-table td:nth-child(3) { word-break: break-word; white-space: normal; }
 table.kpi-table tbody tr:hover td { background: var(--table-hover) !important; }
@@ -260,7 +285,7 @@ table.kpi-table tr:nth-child(even) td { background: var(--table-even); }
 .task-table-wrap { overflow-x: auto; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
 table.task-table { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 700px; }
 table.task-table th { background: var(--table-header-bg); color: #fff; padding: 8px 8px; font-size: 13px;
-  font-weight: 600; white-space: nowrap; text-align: left; }
+  font-weight: 600; white-space: nowrap; text-align: left; position: sticky; top: 56px; z-index: 5; }
 table.task-table td { padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: background .15s; }
 table.task-table td:nth-child(2), table.task-table td:nth-child(3) { word-break: break-word; white-space: normal; }
 table.task-table tbody tr:hover td { background: var(--table-hover) !important; }
@@ -288,6 +313,11 @@ table.task-table td.td-prio select {
 .status-done    { background: #D4EDDA !important; }
 .status-delayed { background: #FDECEA !important; }
 .status-dropped { background: #EBEBEB !important; color: #999 !important; text-decoration: line-through; }
+/* Overdue marker (added to row when due date is in the past and not done/dropped) */
+table.task-table tr.overdue td { box-shadow: inset 4px 0 0 var(--red); }
+table.task-table tr.overdue td:nth-child(6) { color: var(--red) !important; font-weight: 700; }
+table.task-table tr.overdue td:nth-child(6)::after { content: " ⚠"; }
+:root[data-theme="dark"] table.task-table tr.overdue td:nth-child(6) { color: #FF6B61 !important; }
 
 .td-actions button { background: none; border: none; cursor: pointer; font-size: 16px;
   padding: 4px 6px; color: #ccc; border-radius: 6px; transition: all .2s; }
@@ -382,7 +412,22 @@ table.task-table td.td-prio select {
 
 /* ── PRINT ───────────────────────────────────────────────────── */
 @media print {
-  @page { size: A4 portrait; margin: 12mm 12mm 15mm; }
+  @page {
+    size: A4 portrait;
+    margin: 14mm 12mm 18mm;
+    @bottom-right { content: "Seite " counter(page) " / " counter(pages); font-family: -apple-system, sans-serif; font-size: 8pt; color: #666; }
+    @bottom-left  { content: "Helfende Hände – Weekly Management JF"; font-family: -apple-system, sans-serif; font-size: 8pt; color: #999; }
+  }
+  /* Diagonal watermark on every page */
+  body::before {
+    content: "VERTRAULICH";
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 90pt; color: rgba(204,0,0,.06);
+    font-weight: 900; letter-spacing: 4pt;
+    z-index: 0; pointer-events: none;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
 
   body { background: #fff; font-size: 9pt; color: #222; }
   .page-wrap { max-width: 100%; padding: 0; }
@@ -581,6 +626,9 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   </button>
 </div>
 
+<!-- MINI DASHBOARD -->
+<div id="dashboard" class="dashboard no-print"></div>
+
 <!-- ── 1. MEETINGDATEN ───────────────────────────────────────── -->
 <div class="section">
   <div class="section-title"><span class="section-num">1</span>Meetingdaten</div>
@@ -611,7 +659,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   <div class="add-task-row no-print" style="margin-top:10px">
     <input type="text" id="ag-thema" placeholder="Agenda-Punkt / Thema …" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--input-border);border-radius:10px;font-family:var(--font);font-size:13px;background:var(--input-bg);color:var(--gray-dark);">
     <input type="text" id="ag-ent"   placeholder="Entscheidung" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--input-border);border-radius:10px;font-family:var(--font);font-size:13px;background:var(--input-bg);color:var(--gray-dark);">
-    <input type="text" id="ag-ver"   placeholder="Verantwortlich" style="width:150px;min-width:0;padding:7px 10px;border:1px solid var(--input-border);border-radius:10px;font-family:var(--font);font-size:13px;background:var(--input-bg);color:var(--gray-dark);">
+    <input type="text" id="ag-ver"   placeholder="Verantwortlich" list="person-suggestions" autocomplete="off" style="width:150px;min-width:0;padding:7px 10px;border:1px solid var(--input-border);border-radius:10px;font-family:var(--font);font-size:13px;background:var(--input-bg);color:var(--gray-dark);">
     <button class="btn btn-primary" onclick="addAgendaItem()">+ Punkt</button>
   </div>
 </div>
@@ -656,8 +704,16 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   </div>
   <div class="add-task-row no-print">
     <input class="task-desc"   type="text"   id="nt-desc"   placeholder="Aufgabenbeschreibung …">
-    <input class="task-person" type="text"   id="nt-person" placeholder="Verantwortlich">
-    <input class="task-date"   type="date"   id="nt-due">
+    <input class="task-person" type="text"   id="nt-person" placeholder="Verantwortlich" list="person-suggestions" autocomplete="off">
+    <datalist id="person-suggestions"></datalist>
+    <div class="date-quick-wrap">
+      <input class="task-date" type="date" id="nt-due">
+      <div class="date-quick no-print">
+        <button type="button" onclick="setQuickDue(0)" title="Heute">Heute</button>
+        <button type="button" onclick="setQuickDue(7)" title="In einer Woche">+1 W</button>
+        <button type="button" onclick="setQuickDue(14)" title="In zwei Wochen">+2 W</button>
+      </div>
+    </div>
     <select class="task-prio"  id="nt-prio">
       <option value="Hoch">🔴 Hoch</option>
       <option value="Mittel" selected>🟡 Mittel</option>
@@ -735,7 +791,7 @@ function renderAgenda() {
           oninput="state.agenda[${i}].thema=this.value;markDirty();this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Thema …">${escH(item.thema)}</textarea></td>
       <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;resize:none;min-height:22px;overflow:hidden;"
           oninput="state.agenda[${i}].ent=this.value;markDirty();this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Entscheidung …">${escH(item.ent||'')}</textarea></td>
-      <td><input type="text" value="${escH(item.ver)}" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;"
+      <td><input type="text" value="${escH(item.ver)}" list="person-suggestions" autocomplete="off" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;"
           oninput="state.agenda[${i}].ver=this.value;markDirty();" placeholder="—"></td>
       <td class="no-print" style="text-align:center">
         <button onclick="delAgendaItem(${i})" style="background:none;border:none;cursor:pointer;color:#aaa;font-size:14px;">✕</button>
@@ -807,12 +863,20 @@ function delBeschluss(i) {
 const STATUS_CLASSES = { 'OFFEN':'status-open','IN ARBEIT':'status-working','ERLEDIGT':'status-done','VERZÖGERT':'status-delayed','ENTFÄLLT':'status-dropped' };
 const PRIO_ICONS     = { 'Hoch':'🔴','Mittel':'🟡','Niedrig':'🟢' };
 
+function isOverdue(t) {
+  if (!t.due) return false;
+  if (t.status === 'ERLEDIGT' || t.status === 'ENTFÄLLT') return false;
+  const today = new Date().toISOString().slice(0,10);
+  return t.due < today;
+}
 function renderTasks() {
   const body = document.getElementById('new-task-body');
   body.innerHTML = '';
   state.tasks.forEach((t, i) => {
     const tr = document.createElement('tr');
-    tr.className = STATUS_CLASSES[t.status] || '';
+    const cls = [STATUS_CLASSES[t.status] || ''];
+    if (isOverdue(t)) cls.push('overdue');
+    tr.className = cls.filter(Boolean).join(' ');
     tr.innerHTML = `
       <td style="text-align:center;font-weight:700;color:var(--green)">${i+1}</td>
       <td class="td-prio">
@@ -822,7 +886,7 @@ function renderTasks() {
       </td>
       <td><textarea rows="1" style="width:100%;border:none;background:transparent;font-family:var(--font);font-size:12px;resize:none;min-height:20px;overflow:hidden;"
           oninput="updateTask(${i},'desc',this.value);this.style.height='auto';this.style.height=this.scrollHeight+'px';" placeholder="Aufgabe …">${escH(t.desc)}</textarea></td>
-      <td><input type="text" value="${escH(t.person)}" oninput="updateTask(${i},'person',this.value)" placeholder="Name"></td>
+      <td><input type="text" value="${escH(t.person)}" list="person-suggestions" autocomplete="off" oninput="updateTask(${i},'person',this.value)" placeholder="Name"></td>
       <td><input type="date" value="${t.created||''}" onchange="updateTask(${i},'created',this.value)"></td>
       <td><input type="date" value="${t.due||''}" onchange="updateTask(${i},'due',this.value)"></td>
       <td><input type="date" value="${t.done||''}" onchange="updateTask(${i},'done',this.value)"></td>
@@ -943,6 +1007,48 @@ function setDefaultDueDate() {
     dueEl.value = d.toISOString().slice(0, 10);
   }
 }
+function setQuickDue(daysFromToday) {
+  const dueEl = document.getElementById('nt-due');
+  if (!dueEl) return;
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromToday);
+  dueEl.value = d.toISOString().slice(0, 10);
+}
+function renderDashboard() {
+  const el = document.getElementById('dashboard');
+  if (!el) return;
+  const total = state.tasks.length;
+  const open = state.tasks.filter(t => t.status === 'OFFEN' || t.status === 'IN ARBEIT').length;
+  const overdue = state.tasks.filter(isOverdue).length;
+  const done = state.tasks.filter(t => t.status === 'ERLEDIGT').length;
+  // "Carried over": tasks created before this month's m-date
+  const jfDate = state.meta['m-date'] || new Date().toISOString().slice(0,10);
+  const monthStart = jfDate.slice(0,7) + '-01'; // YYYY-MM-01
+  const carried = state.tasks.filter(t => t.created && t.created < monthStart).length;
+  el.innerHTML = `
+    <div class="dash-card"><span class="dash-value">${total}</span><span class="dash-label">Aufgaben gesamt</span></div>
+    <div class="dash-card"><span class="dash-value">${open}</span><span class="dash-label">Offen / In Arbeit</span></div>
+    <div class="dash-card dash-overdue"><span class="dash-value">${overdue}</span><span class="dash-label">Überfällig ⚠</span></div>
+    <div class="dash-card dash-carry"><span class="dash-value">${carried}</span><span class="dash-label">Aus Vormonat</span></div>
+    <div class="dash-card"><span class="dash-value">${done}</span><span class="dash-label">Erledigt</span></div>
+  `;
+}
+function refreshPersonSuggestions() {
+  const dl = document.getElementById('person-suggestions');
+  if (!dl) return;
+  const set = new Set();
+  // Static names from teilnehmer
+  (state.meta['m-teilnehmer'] || '').split(/[,;]/).forEach(n => { const v = n.trim(); if (v) set.add(v); });
+  // From current tasks + agenda
+  state.tasks.forEach(t => { if (t.person) set.add(t.person.trim()); });
+  state.agenda.forEach(a => { if (a.ver) set.add(a.ver.trim()); });
+  // From archive
+  (state.archiv || []).forEach(arch => {
+    (arch.tasks || []).forEach(t => { if (t.person) set.add(t.person.trim()); });
+    (arch.agenda || []).forEach(a => { if (a.ver) set.add(a.ver.trim()); });
+  });
+  dl.innerHTML = [...set].filter(Boolean).sort().map(v => `<option value="${escH(v)}">`).join('');
+}
 function collectMeta() {
   ['m-date','m-teilnehmer'].forEach(id => {
     const el = document.getElementById(id); if(el) state.meta[id] = el.value;
@@ -984,6 +1090,7 @@ async function saveData() {
       .upsert({ id: 'current', data: state, updated_at: new Date().toISOString() });
     if (error) throw error;
     localStorage.setItem('mbr_current', JSON.stringify(state));
+    _hasUnsavedChanges = false;
     setStatus('Gespeichert – ' + new Date().toLocaleTimeString('de-DE'), 'ok');
     // Daily auto-backup
     const today = new Date().toISOString().slice(0,10);
@@ -1059,16 +1166,58 @@ async function clearAll() {
   }
 }
 let _saveTimer = null;
+let _hasUnsavedChanges = false;
 function markDirty() {
+  _hasUnsavedChanges = true;
   setStatus('Nicht gespeichert', 'error');
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => { _saveTimer = null; collectMeta(); saveData(); }, 1500);
 }
+window.addEventListener('beforeunload', (e) => {
+  if (_hasUnsavedChanges || _saving || _saveTimer) {
+    e.preventDefault();
+    e.returnValue = 'Es gibt noch ungespeicherte Änderungen. Wirklich verlassen?';
+    return e.returnValue;
+  }
+});
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────
+window.addEventListener('keydown', (e) => {
+  const mod = e.metaKey || e.ctrlKey;
+  if (!mod) return;
+  // Cmd/Ctrl+S → save
+  if (e.key === 's' || e.key === 'S') {
+    e.preventDefault();
+    clearTimeout(_saveTimer); _saveTimer = null;
+    collectMeta(); saveData();
+  }
+  // Cmd/Ctrl+P → print PDF (use our wrapper for the nicer filename)
+  else if (e.key === 'p' || e.key === 'P') {
+    e.preventDefault();
+    printPDF();
+  }
+  // Cmd/Ctrl+K → focus Aufgabenbeschreibung (quick add task)
+  else if (e.key === 'k' || e.key === 'K') {
+    e.preventDefault();
+    const el = document.getElementById('nt-desc');
+    if (el) { el.focus(); el.scrollIntoView({behavior:'smooth', block:'center'}); }
+  }
+  // Cmd/Ctrl+F → open search bar (Phase 2 will handle)
+  else if (e.key === 'f' || e.key === 'F') {
+    const sb = document.getElementById('global-search');
+    if (sb) { e.preventDefault(); sb.focus(); sb.select(); }
+  }
+});
 function setStatus(msg, type) {
   const el = document.getElementById('save-status');
   if (!el) return;
   const cls = type === 'error' ? 'error' : type === 'ok' ? 'connected' : 'pending';
-  el.innerHTML = '<span class="status-dot ' + cls + '"></span>' + msg;
+  el.classList.remove('saved');
+  el.innerHTML = '<span class="status-dot ' + cls + '"></span>' + msg + '<span class="check">✓</span>';
+  if (type === 'ok' && /Gespeichert/i.test(msg)) {
+    el.classList.add('saved');
+    clearTimeout(setStatus._t);
+    setStatus._t = setTimeout(() => el.classList.remove('saved'), 2200);
+  }
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────
@@ -1078,6 +1227,8 @@ function renderAll() {
   renderTasks();
   applyMeta();
   updateHeaderPeriod();
+  refreshPersonSuggestions();
+  renderDashboard();
 }
 
 // ── UTILS ─────────────────────────────────────────────────────
