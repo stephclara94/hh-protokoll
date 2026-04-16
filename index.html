@@ -177,6 +177,8 @@ tr.comment-row .comment-add { display: flex; gap: 6px; }
 tr.comment-row .comment-add input { flex: 1; padding: 6px 10px; border: 1px solid var(--input-border);
   border-radius: 8px; font-family: var(--font); font-size: 12px; background: var(--input-bg); color: var(--gray-dark); }
 tr.comment-row .comment-add button { padding: 6px 12px; font-size: 12px; }
+/* Print cover (hidden on screen) */
+.print-cover { display: none; }
 /* Audit log */
 .audit-list { display: flex; flex-direction: column; gap: 4px; max-height: 360px; overflow-y: auto; }
 .audit-item { display: flex; gap: 10px; align-items: baseline; padding: 6px 10px; font-size: 12px;
@@ -508,10 +510,39 @@ table.task-table tr.overdue td:nth-child(6)::after { content: " ⚠"; }
   .toolbar, .btn, .add-task-row, .td-actions,
   .no-print, button { display: none !important; }
 
+  /* COVER PAGE */
+  .print-cover { display: block !important; page-break-after: always;
+    height: 100vh; padding: 30mm 0; text-align: center; position: relative; }
+  .print-cover .cover-logo { width: 80mm; max-width: 80%; height: auto; margin: 0 auto 20mm;
+    display: block; border-radius: 8mm; }
+  .print-cover .cover-title { font-size: 28pt; font-weight: 800; color: #00843D; margin-bottom: 4mm; letter-spacing: -.5pt; }
+  .print-cover .cover-sub { font-size: 14pt; color: #5C5C5C; margin-bottom: 30mm; }
+  .print-cover .cover-period { font-size: 22pt; font-weight: 700; color: #1D1D1F; margin-bottom: 8mm; }
+  .print-cover .cover-meta { font-size: 11pt; color: #5C5C5C; line-height: 1.7; margin: 0 auto; max-width: 140mm; }
+  .print-cover .cover-meta strong { color: #1D1D1F; }
+  .print-cover .cover-badge { display: inline-block; background: #CC0000; color: #fff;
+    padding: 3mm 8mm; border-radius: 2mm; font-size: 11pt; font-weight: 700; letter-spacing: 1.5pt;
+    margin-top: 14mm;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .print-cover .cover-stats { display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 6mm; max-width: 160mm; margin: 12mm auto 0; }
+  .print-cover .cover-stat { border: .5pt solid #ccc; border-radius: 2mm; padding: 4mm 2mm; }
+  .print-cover .cover-stat .v { font-size: 18pt; font-weight: 700; color: #00843D; }
+  .print-cover .cover-stat .l { font-size: 8pt; color: #5C5C5C; margin-top: 1mm; }
+
   .section { background: #fff; border: 1px solid #bbb; border-radius: 0;
-    padding: 8pt 10pt; margin-bottom: 8pt; page-break-inside: auto; }
-  .section-title { font-size: 10pt; color: #00843D; border-bottom: 1.5pt solid #00843D; }
+    padding: 8pt 10pt; margin-bottom: 8pt; page-break-inside: avoid; break-inside: avoid; }
+  .section-title { font-size: 10pt; color: #00843D; border-bottom: 1.5pt solid #00843D;
+    page-break-after: avoid; break-after: avoid; }
   .section-sub { font-size: 9pt; }
+  /* Keep tasks/agenda rows together */
+  table.task-table tr, table.kpi-table tr { page-break-inside: avoid; break-inside: avoid; }
+  table.task-table thead, table.kpi-table thead { display: table-header-group; }
+  table.task-table tfoot, table.kpi-table tfoot { display: table-footer-group; }
+  /* Beschluss-Items shouldn't be split */
+  .beschluss-item { page-break-inside: avoid; break-inside: avoid; }
+  /* Hide audit log and dashboard on print */
+  #sec-audit, .dashboard, .search-results { display: none !important; }
 
   .doc-header { background: #fff !important; border-bottom: 2pt solid #00843D;
     padding: 6pt 10pt; margin: 0 0 10pt; }
@@ -671,6 +702,17 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 </script>
 
 <div class="page-wrap" id="doc">
+
+<!-- PRINT COVER PAGE (only visible in print) -->
+<div class="print-cover" id="print-cover" style="display:none;">
+  <img src="apple-touch-icon.png" alt="Logo" class="cover-logo">
+  <div class="cover-title">HELFENDE HÄNDE GROUP</div>
+  <div class="cover-sub">Weekly Management JF · Protokoll &amp; Aufgabentracker</div>
+  <div class="cover-period" id="cover-period"></div>
+  <div class="cover-meta" id="cover-meta"></div>
+  <div class="cover-stats" id="cover-stats"></div>
+  <div class="cover-badge">VERTRAULICH</div>
+</div>
 
 <!-- HEADER -->
 <div class="doc-header">
@@ -1160,6 +1202,33 @@ function addTask() {
 }
 
 // ── PRINT / PDF ──────────────────────────────────────────────
+function fillPrintCover() {
+  collectMeta();
+  const periodEl = document.getElementById('cover-period');
+  const metaEl   = document.getElementById('cover-meta');
+  const statsEl  = document.getElementById('cover-stats');
+  if (!periodEl) return;
+  const dateRaw = state.meta['m-date'] || new Date().toISOString().slice(0,10);
+  const d = new Date(dateRaw);
+  periodEl.textContent = d.toLocaleDateString('de-DE', { month:'long', year:'numeric' });
+  const dateFmt = d.toLocaleDateString('de-DE', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  metaEl.innerHTML = `
+    <div><strong>Sitzungsdatum:</strong> ${escH(dateFmt)}</div>
+    <div><strong>Teilnehmer:</strong> ${escH(state.meta['m-teilnehmer'] || '—')}</div>
+    <div><strong>Erstellt am:</strong> ${escH(new Date().toLocaleString('de-DE'))}</div>
+  `;
+  const total = state.tasks.length;
+  const open = state.tasks.filter(t => t.status === 'OFFEN' || t.status === 'IN ARBEIT').length;
+  const overdue = state.tasks.filter(isOverdue).length;
+  const done = state.tasks.filter(t => t.status === 'ERLEDIGT').length;
+  statsEl.innerHTML = `
+    <div class="cover-stat"><div class="v">${state.agenda.length}</div><div class="l">Agenda-Punkte</div></div>
+    <div class="cover-stat"><div class="v">${state.beschluesse.length}</div><div class="l">Beschlüsse</div></div>
+    <div class="cover-stat"><div class="v">${total}</div><div class="l">Aufgaben</div></div>
+    <div class="cover-stat"><div class="v" style="color:#CC0000;">${overdue}</div><div class="l">Überfällig</div></div>
+  `;
+  document.getElementById('print-cover').style.display = 'block';
+}
 function printPDF() {
   const today = new Date();
   const y = today.getFullYear();
@@ -1167,6 +1236,8 @@ function printPDF() {
   const d = String(today.getDate()).padStart(2, '0');
   const origTitle = document.title;
   document.title = `${y}-${m}-${d} weekly Management JF`;
+  // Fill cover page
+  fillPrintCover();
   // Expand all textareas to their full content height so nothing is clipped on print
   document.querySelectorAll('textarea').forEach(ta => {
     ta.dataset._h = ta.style.height;
@@ -1178,6 +1249,8 @@ function printPDF() {
   document.querySelectorAll('textarea').forEach(ta => {
     if (ta.dataset._h !== undefined) { ta.style.height = ta.dataset._h; delete ta.dataset._h; }
   });
+  // Hide cover again
+  setTimeout(() => { document.getElementById('print-cover').style.display = 'none'; }, 100);
 }
 
 // ── NEW MONTH ─────────────────────────────────────────────────
