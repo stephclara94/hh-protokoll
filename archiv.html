@@ -446,6 +446,12 @@ async function loadData() {
   }
   if (data && data.data) state = data.data;
   document.getElementById('status-msg').textContent = 'Geladen';
+  // Pre-fill search from ?q= in URL (used by global search on protocol page)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) document.getElementById('search').value = q;
+  } catch(e) {}
   renderArchiv();
   renderStats();
 }

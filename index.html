@@ -158,6 +158,26 @@ body { font-family: var(--font); font-size: 14px; color: var(--gray-dark); backg
   flex-shrink: 0;
 }
 .theme-switch:hover { background: rgba(0,132,61,.18); }
+/* Global Search */
+.global-search {
+  flex: 0 1 240px; min-width: 0;
+  padding: 8px 14px; border-radius: 980px;
+  border: 1px solid var(--input-border); background: var(--input-bg); color: var(--gray-dark);
+  font-family: var(--font); font-size: 13px; outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.global-search:focus { border-color: var(--green); box-shadow: 0 0 0 4px var(--focus-ring); }
+.search-results { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px;
+  padding: 12px 14px; margin-bottom: 16px; backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow); font-size: 13px; max-height: 360px; overflow-y: auto; }
+.search-results .sr-group { font-weight: 700; color: var(--green); margin: 8px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+.search-results .sr-group:first-child { margin-top: 0; }
+.search-results a { display: block; color: var(--gray-dark); text-decoration: none; padding: 4px 6px;
+  border-radius: 6px; transition: background .15s; }
+.search-results a:hover { background: var(--table-hover); color: var(--green); }
+.search-results .sr-meta { color: var(--gray-med); font-size: 11px; margin-left: 6px; }
+.search-results mark { background: rgba(255,235,59,.4); color: inherit; padding: 0 2px; border-radius: 3px; }
+:root[data-theme="dark"] .search-results mark { background: rgba(255,159,10,.35); }
+.search-empty { color: var(--gray-med); font-style: italic; }
 /* Mini Dashboard */
 .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px; }
 .dash-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px;
@@ -272,8 +292,14 @@ table.kpi-table tr:nth-child(even) td { background: var(--table-even); }
 .beschluss-item .del-btn:hover { color: var(--red); background: #fde8e8; transform: scale(1.15); }
 
 /* ── TASK TRACKER ────────────────────────────────────────────── */
-.tracker-header { display: grid; gap: 6px; align-items: center; margin-bottom: 10px; }
+.tracker-header { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; justify-content: space-between; margin-bottom: 10px; }
 .tracker-header .legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.task-filter { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.task-filter select { padding: 6px 10px; font-size: 12px; border-radius: 8px;
+  border: 1px solid var(--input-border); background: var(--input-bg); color: var(--gray-dark);
+  font-family: var(--font); cursor: pointer; }
+.task-filter select:hover { border-color: var(--green); }
+.task-filter .btn-sm { padding: 6px 10px; font-size: 12px; }
 .legend-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px;
   padding: 3px 9px; border-radius: 20px; font-weight: 600; }
 .pill-open     { background: rgba(255,243,205,.7); color: #7A5000; border: 1px solid rgba(245,215,143,.5); }
@@ -619,12 +645,14 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   <a href="archiv.html" class="btn btn-secondary" style="text-decoration:none;">🗂 Archiv</a>
   <button class="btn btn-print" onclick="printPDF()">🖨 Drucken / PDF</button>
   <button class="btn btn-danger" onclick="clearAll()" title="Alle Daten löschen">🗑 Reset</button>
+  <input type="search" id="global-search" class="global-search no-print" placeholder="🔍  Suchen (Cmd+F) …" oninput="runSearch(this.value)" autocomplete="off">
   <button class="theme-switch" role="switch" onclick="toggleTheme()" title="Hell / Dunkel umschalten" aria-label="Theme wechseln">
     <span class="theme-switch-icon sun">☀️</span>
     <span class="theme-switch-icon moon">🌙</span>
     <span class="theme-switch-thumb"></span>
   </button>
 </div>
+<div id="search-results" class="search-results no-print" style="display:none;"></div>
 
 <!-- MINI DASHBOARD -->
 <div id="dashboard" class="dashboard no-print"></div>
@@ -641,7 +669,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 
 
 <!-- ── 3. AGENDA ─────────────────────────────────────────────── -->
-<div class="section">
+<div class="section" id="sec-agenda">
   <div class="section-title"><span class="section-num">2</span>Agenda</div>
   <p style="font-size:14px;color:var(--gray-med);margin-bottom:12px;">Agenda-Punkte eintragen – das Protokoll (Abschnitt 4) wird automatisch befüllt.</p>
   <div class="table-rounded">
@@ -667,7 +695,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 
 
 <!-- ── 5. BESCHLÜSSE ─────────────────────────────────────────── -->
-<div class="section">
+<div class="section" id="sec-beschluesse">
   <div class="section-title"><span class="section-num">3</span>Weitere Beschlüsse</div>
   <p style="font-size:14px;color:var(--gray-med);margin-bottom:12px;">Alle Beschlüsse wurden einstimmig gefasst, soweit nicht anders vermerkt.</p>
   <div id="beschluss-list"></div>
@@ -675,7 +703,7 @@ if(sessionStorage.getItem('hh-auth')==='1'){
 </div>
 
 <!-- ── 6. NEUE AUFGABEN (dieses Meeting) ────────────────────── -->
-<div class="section">
+<div class="section" id="sec-tasks">
   <div class="section-title"><span class="section-num">4</span>Aufgaben</div>
   <div class="tracker-header">
     <div class="legend">
@@ -684,6 +712,29 @@ if(sessionStorage.getItem('hh-auth')==='1'){
       <span class="legend-pill pill-working">● IN ARBEIT</span>
       <span class="legend-pill pill-delayed">● VERZÖGERT</span>
       <span class="legend-pill pill-done">● ERLEDIGT</span>
+    </div>
+    <div class="task-filter no-print">
+      <select id="filter-status" onchange="renderTasks()" title="Status filtern">
+        <option value="">Alle Status</option>
+        <option value="OFFEN">Nur Offen</option>
+        <option value="IN ARBEIT">Nur In Arbeit</option>
+        <option value="VERZÖGERT">Nur Verzögert</option>
+        <option value="ERLEDIGT">Nur Erledigt</option>
+        <option value="ENTFÄLLT">Nur Entfällt</option>
+        <option value="__overdue">Nur Überfällig ⚠</option>
+      </select>
+      <select id="filter-person" onchange="renderTasks()" title="Person filtern">
+        <option value="">Alle Personen</option>
+      </select>
+      <select id="sort-tasks" onchange="renderTasks()" title="Sortieren nach">
+        <option value="">Reihenfolge</option>
+        <option value="due">Fällig (früh→spät)</option>
+        <option value="due-desc">Fällig (spät→früh)</option>
+        <option value="prio">Priorität (Hoch→Niedrig)</option>
+        <option value="status">Status</option>
+        <option value="person">Verantwortlich (A→Z)</option>
+      </select>
+      <button class="btn btn-sm btn-secondary" onclick="resetFilters()" title="Filter zurücksetzen">↺</button>
     </div>
   </div>
   <div class="task-table-wrap">
@@ -869,16 +920,50 @@ function isOverdue(t) {
   const today = new Date().toISOString().slice(0,10);
   return t.due < today;
 }
+function getFilteredTasks() {
+  const fStat = document.getElementById('filter-status')?.value || '';
+  const fPers = document.getElementById('filter-person')?.value || '';
+  const sort  = document.getElementById('sort-tasks')?.value || '';
+  const PRIO_RANK = { 'Hoch': 0, 'Mittel': 1, 'Niedrig': 2 };
+  const STATUS_RANK = { 'OFFEN': 0, 'IN ARBEIT': 1, 'VERZÖGERT': 2, 'ERLEDIGT': 3, 'ENTFÄLLT': 4 };
+  // Pair tasks with their original index so edits hit the right item
+  let arr = state.tasks.map((t, i) => ({ t, i }));
+  if (fStat === '__overdue') arr = arr.filter(x => isOverdue(x.t));
+  else if (fStat) arr = arr.filter(x => x.t.status === fStat);
+  if (fPers) arr = arr.filter(x => (x.t.person || '').trim() === fPers);
+  if (sort === 'due')        arr.sort((a,b) => (a.t.due || '9999').localeCompare(b.t.due || '9999'));
+  else if (sort === 'due-desc') arr.sort((a,b) => (b.t.due || '0000').localeCompare(a.t.due || '0000'));
+  else if (sort === 'prio')  arr.sort((a,b) => (PRIO_RANK[a.t.prio] ?? 9) - (PRIO_RANK[b.t.prio] ?? 9));
+  else if (sort === 'status')arr.sort((a,b) => (STATUS_RANK[a.t.status] ?? 9) - (STATUS_RANK[b.t.status] ?? 9));
+  else if (sort === 'person')arr.sort((a,b) => (a.t.person || '').localeCompare(b.t.person || ''));
+  return arr;
+}
+function refreshFilterOptions() {
+  const sel = document.getElementById('filter-person');
+  if (!sel) return;
+  const cur = sel.value;
+  const persons = [...new Set(state.tasks.map(t => (t.person || '').trim()).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Alle Personen</option>' + persons.map(p => `<option value="${escH(p)}" ${p===cur?'selected':''}>${escH(p)}</option>`).join('');
+}
+function resetFilters() {
+  ['filter-status','filter-person','sort-tasks'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  renderTasks();
+}
 function renderTasks() {
+  refreshFilterOptions();
   const body = document.getElementById('new-task-body');
   body.innerHTML = '';
-  state.tasks.forEach((t, i) => {
+  const filtered = getFilteredTasks();
+  filtered.forEach(({ t, i }, displayIdx) => {
     const tr = document.createElement('tr');
     const cls = [STATUS_CLASSES[t.status] || ''];
     if (isOverdue(t)) cls.push('overdue');
     tr.className = cls.filter(Boolean).join(' ');
+    // Show display index in the # column instead of original position
+    const _i = i; // for clarity in template literals below
+    tr.dataset.origIdx = i;
     tr.innerHTML = `
-      <td style="text-align:center;font-weight:700;color:var(--green)">${i+1}</td>
+      <td style="text-align:center;font-weight:700;color:var(--green)">${displayIdx+1}</td>
       <td class="td-prio">
         <select onchange="updateTask(${i},'prio',this.value)" title="Priorität">
           ${['Hoch','Mittel','Niedrig'].map(p=>`<option value="${p}" ${t.prio===p?'selected':''} title="${p}">${PRIO_ICONS[p]}</option>`).join('')}
@@ -900,6 +985,8 @@ function renderTasks() {
   });
   if (state.tasks.length === 0) {
     body.innerHTML = '<tr><td colspan="9" style="color:var(--gray-med);font-size:14px;padding:10px 8px;">Keine Aufgaben erfasst.</td></tr>';
+  } else if (filtered.length === 0) {
+    body.innerHTML = '<tr><td colspan="9" style="color:var(--gray-med);font-size:13px;padding:14px 8px;text-align:center;">Keine Aufgaben treffen auf den Filter zu. <a href="#" onclick="event.preventDefault();resetFilters()" style="color:var(--green);">Filter zurücksetzen</a></td></tr>';
   }
   autoResizeAll(body);
 }
@@ -1013,6 +1100,58 @@ function setQuickDue(daysFromToday) {
   const d = new Date();
   d.setDate(d.getDate() + daysFromToday);
   dueEl.value = d.toISOString().slice(0, 10);
+}
+// ── SEARCH ────────────────────────────────────────────────────
+function _hl(text, q) {
+  if (!text) return '';
+  const safe = escH(text);
+  if (!q) return safe;
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return safe.replace(re, '<mark>$1</mark>');
+}
+function runSearch(qRaw) {
+  const out = document.getElementById('search-results');
+  const q = (qRaw || '').trim();
+  if (!q) { out.style.display = 'none'; out.innerHTML = ''; return; }
+  const ql = q.toLowerCase();
+  const hit = (s) => (s || '').toLowerCase().includes(ql);
+
+  const agendaHits      = state.agenda.filter(a => hit(a.thema) || hit(a.ent) || hit(a.ver));
+  const beschlussHits   = state.beschluesse.filter(b => hit(b.header) || hit(b.text));
+  const taskHits        = state.tasks.filter(t => hit(t.desc) || hit(t.person) || hit(t.status));
+  const archivMonthHits = (state.archiv || []).map((m, mi) => {
+    const ag = (m.agenda      || []).filter(a => hit(a.thema) || hit(a.ent) || hit(a.ver));
+    const be = (m.beschluesse || []).filter(b => hit(b.header) || hit(b.text));
+    const ta = (m.tasks       || []).filter(t => hit(t.desc) || hit(t.person) || hit(t.status));
+    return { m, mi, ag, be, ta };
+  }).filter(x => x.ag.length || x.be.length || x.ta.length);
+
+  let html = '';
+  if (!agendaHits.length && !beschlussHits.length && !taskHits.length && !archivMonthHits.length) {
+    html = '<div class="search-empty">Keine Treffer.</div>';
+  } else {
+    if (agendaHits.length) {
+      html += '<div class="sr-group">Agenda (' + agendaHits.length + ')</div>';
+      agendaHits.forEach(a => { html += '<a href="#sec-agenda">' + _hl(a.thema, q) + '<span class="sr-meta">→ ' + _hl(a.ent || '—', q) + ' · ' + _hl(a.ver || '—', q) + '</span></a>'; });
+    }
+    if (beschlussHits.length) {
+      html += '<div class="sr-group">Beschlüsse (' + beschlussHits.length + ')</div>';
+      beschlussHits.forEach(b => { html += '<a href="#sec-beschluesse"><strong>' + _hl(b.header || '—', q) + '</strong><span class="sr-meta">' + _hl((b.text || '').slice(0,80), q) + '</span></a>'; });
+    }
+    if (taskHits.length) {
+      html += '<div class="sr-group">Aufgaben (' + taskHits.length + ')</div>';
+      taskHits.forEach(t => { html += '<a href="#sec-tasks">' + _hl(t.desc, q) + '<span class="sr-meta">' + _hl(t.person || '—', q) + ' · ' + (t.status || '') + (t.due ? ' · fällig ' + t.due : '') + '</span></a>'; });
+    }
+    if (archivMonthHits.length) {
+      html += '<div class="sr-group">Archiv (' + archivMonthHits.reduce((n,x) => n + x.ag.length + x.be.length + x.ta.length, 0) + ')</div>';
+      archivMonthHits.forEach(x => {
+        const total = x.ag.length + x.be.length + x.ta.length;
+        html += '<a href="archiv.html?q=' + encodeURIComponent(q) + '"><strong>' + escH(x.m.label || 'Monat') + '</strong><span class="sr-meta">' + total + ' Treffer · zum Archiv</span></a>';
+      });
+    }
+  }
+  out.innerHTML = html;
+  out.style.display = 'block';
 }
 function renderDashboard() {
   const el = document.getElementById('dashboard');
