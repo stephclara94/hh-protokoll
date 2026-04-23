@@ -734,9 +734,6 @@ if(sessionStorage.getItem('hh-auth')==='1'){
   <a href="archiv.html" class="btn btn-secondary" style="text-decoration:none;">🗂 Archiv</a>
   <button class="btn btn-print" onclick="printPDF()">🖨 Drucken / PDF</button>
   <button class="btn btn-danger" onclick="clearAll()" title="Alle Daten löschen">🗑 Reset</button>
-  <button class="btn btn-secondary" onclick="exportJSON()" title="Backup als JSON herunterladen">⬇ Export</button>
-  <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()" title="Backup wiederherstellen">⬆ Import</button>
-  <input type="file" id="import-file" accept="application/json" style="display:none;" onchange="importJSON(this)">
   <input type="search" id="global-search" class="global-search no-print" placeholder="🔍  Suchen (Cmd+F) …" oninput="runSearch(this.value)" autocomplete="off">
   <button class="theme-switch" role="switch" onclick="toggleTheme()" title="Hell / Dunkel umschalten" aria-label="Theme wechseln">
     <span class="theme-switch-icon sun">☀️</span>
